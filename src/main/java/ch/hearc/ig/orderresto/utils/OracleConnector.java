@@ -1,5 +1,8 @@
 package ch.hearc.ig.orderresto.utils;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,8 +14,35 @@ public class OracleConnector {
     private static final String DB_USER = propertiesLoader.getProperty("db.user");
     private static final String DB_PASSWORD = propertiesLoader.getProperty("db.password");
 
-    public static void testConnection() throws SQLException {
-        try (Connection connection = OracleConnector.getConnection()) {
+    private static HikariDataSource dataSource;
+
+    public static void setPollConfig() {
+        HikariConfig config = new HikariConfig();
+
+        config.setJdbcUrl(DB_URL);
+        config.setUsername(DB_USER);
+        config.setPassword(DB_PASSWORD);
+        config.setMaximumPoolSize(3);
+
+        dataSource = new HikariDataSource(config);
+    }
+
+    public static Connection getConnectionFromPool() throws SQLException {
+        return dataSource.getConnection();
+    }
+
+    public static void closePool() {
+        if (dataSource != null) {
+            dataSource.close();
+        }
+    }
+
+    public static Connection getNewConnection() throws SQLException {
+        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+    }
+
+    public static void testNewConnection() throws SQLException {
+        try (Connection connection = OracleConnector.getNewConnection()) {
             if (connection != null) {
                 System.out.println("[+] Connection established!");
             } else {
@@ -21,9 +51,5 @@ public class OracleConnector {
         } catch (SQLException e) {
             System.err.println("[-] An error occurred: " + e.getMessage());
         }
-    }
-
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 }
