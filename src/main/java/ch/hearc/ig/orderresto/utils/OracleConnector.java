@@ -17,6 +17,11 @@ public class OracleConnector {
 
     private static HikariDataSource dataSource;
 
+    // Static block for automatic initialization
+    static {
+        setPoolConfig();
+    }
+
     public static void setPoolConfig() {
         HikariConfig config = new HikariConfig();
 
@@ -38,19 +43,18 @@ public class OracleConnector {
         }
     }
 
-    public static Connection getNewConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-    }
-
-    public static void testNewConnection() throws SQLException {
-        try (Connection connection = OracleConnector.getNewConnection()) {
+    public static boolean isDatabaseConnectable() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             if (connection != null) {
                 System.out.println("[+] Connection established!");
+                return true;
             } else {
                 System.out.println("[-] Connection failed!");
+                return false;
             }
         } catch (SQLException e) {
             System.err.println("[-] An error occurred: " + e.getMessage());
+            return false;
         }
     }
 }
