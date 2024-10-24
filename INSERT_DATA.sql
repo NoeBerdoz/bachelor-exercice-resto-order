@@ -1,5 +1,3 @@
-SET DEFINE OFF;
-
 INSERT INTO RESTAURANT(nom, code_postal, localite, rue, num_rue, pays)
     VALUES ('Alpes Et Lac', '2000', 'Neuchâtel', 'Place de La Gare', '2', 'CH');
 INSERT INTO RESTAURANT(nom, code_postal, localite, rue, num_rue, pays)
@@ -27,8 +25,4 @@ INSERT INTO CLIENT(type, email, est_une_femme, nom, prenom, forme_sociale, code_
 
 INSERT INTO CLIENT(type, email, est_une_femme, nom, prenom, forme_sociale, code_postal, localite, rue, num_rue, pays, telephone)
     VALUES ('O', 'info@rhne.ch', NULL, 'Hôpital Pourtales', NULL, 'SA', '2000', 'Neuchâtel', 'Rue du test', '5b', 'CH', '+41 32 000 00 00');
-COMMIT;
-
-
-INSERT INTO VILLES(code_postal, nom_ville) VALUES ('2000', 'Neuch�tel');
 COMMIT;
