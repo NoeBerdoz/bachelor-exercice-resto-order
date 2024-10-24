@@ -55,13 +55,17 @@ public class OrderCLI extends AbstractCLI {
 
     public Order selectOrder() {
         Customer customer = (new CustomerCLI()).getExistingCustomer();
+        if (customer == null) {
+            this.ln(String.format("Désolé, nous ne connaissons pas cette personne."));
+            return null;
+        }
         Object[] orders = customer.getOrders().toArray();
         if (orders.length == 0) {
             this.ln(String.format("Désolé, il n'y a aucune commande pour %s", customer.getEmail()));
             return null;
         }
         this.ln("Choisissez une commande:");
-        for (int i = 0 ; i < orders.length ; i++) {
+        for (int i = 0; i < orders.length; i++) {
             Order order = (Order) orders[i];
             LocalDateTime when = order.getWhen();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy à hh:mm");
@@ -76,7 +80,7 @@ public class OrderCLI extends AbstractCLI {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy à hh:mm");
         this.ln(String.format("Commande %.2f, le %s chez %s.:", order.getTotalAmount(), when.format(formatter), order.getRestaurant().getName()));
         int index = 1;
-        for (Product product: order.getProducts()) {
+        for (Product product : order.getProducts()) {
             this.ln(String.format("%d. %s", index, product));
             index++;
         }
