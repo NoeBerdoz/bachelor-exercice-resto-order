@@ -13,16 +13,17 @@ public class OracleConnector {
     private static final String DB_URL = propertiesLoader.getProperty("db.url");
     private static final String DB_USER = propertiesLoader.getProperty("db.user");
     private static final String DB_PASSWORD = propertiesLoader.getProperty("db.password");
+    private static final String DB_POOL_SIZE = propertiesLoader.getProperty("db.pool.size");
 
     private static HikariDataSource dataSource;
 
-    public static void setPollConfig() {
+    public static void setPoolConfig() {
         HikariConfig config = new HikariConfig();
 
         config.setJdbcUrl(DB_URL);
         config.setUsername(DB_USER);
         config.setPassword(DB_PASSWORD);
-        config.setMaximumPoolSize(3);
+        config.setMaximumPoolSize(Integer.parseInt(DB_POOL_SIZE));
 
         dataSource = new HikariDataSource(config);
     }
