@@ -1,5 +1,7 @@
 package ch.hearc.ig.orderresto.application;
 
+import ch.hearc.ig.orderresto.business.Restaurant;
+import ch.hearc.ig.orderresto.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.presentation.MainCLI;
 import ch.hearc.ig.orderresto.utils.OracleConnector;
 
@@ -23,11 +25,18 @@ public class Main {
         OracleConnector.isDatabaseConnectable();
 
         OracleConnector.getConnectionFromPool();
-        logger.info("Open Connection from pool!");
-        System.out.println("[+] Open Connection from pool!");
-        OracleConnector.closePool();
-        System.out.println("[-] Closed connection from pool!");
 
-        (new MainCLI()).run();
+        logger.info("Trying to get a restaurant by its ID");
+        RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
+
+        Restaurant restaurantFound = restaurantDataMapper.selectById(1L);
+
+        logger.info("Restaurant found: {}", restaurantFound.toString());
+
+
+
+        OracleConnector.closePool();
+
+//        (new MainCLI()).run();
     }
 }
