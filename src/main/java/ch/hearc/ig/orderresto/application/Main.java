@@ -1,5 +1,6 @@
 package ch.hearc.ig.orderresto.application;
 
+import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.presentation.MainCLI;
@@ -33,6 +34,14 @@ public class Main {
 
         logger.info("Restaurant found: {}", restaurantFound.toString());
 
+        Address addressToInsert = new Address("CH", "2048", "Boot", "Loader", "42");
+        Restaurant restaurantToInsert = new Restaurant.Builder()
+                .withId(1L)
+                .withName("Eat Binary")
+                .withAddress(addressToInsert)
+                .build();
+
+        restaurantDataMapper.insert(restaurantToInsert);
 
 
         OracleConnector.closePool();
