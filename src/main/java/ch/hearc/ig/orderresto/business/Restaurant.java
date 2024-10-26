@@ -35,6 +35,10 @@ public class Restaurant {
         return address;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Set<Product> getProductsCatalog() {
         return productsCatalog;
     }
@@ -49,4 +53,30 @@ public class Restaurant {
     public void addOrder(Order order) {
         this.orders.add(order);
     }
+
+    public static class Builder {
+        private Long id;
+        private String name;
+        private Address address;
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withAddress(Address address) {
+            this.address = address;
+            return this;
+        }
+
+        public Restaurant build() {
+            return new Restaurant(id, name, address);
+        }
+    }
+
 }
