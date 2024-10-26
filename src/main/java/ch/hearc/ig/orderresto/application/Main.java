@@ -33,7 +33,7 @@ public class Main {
 
         Restaurant restaurantFound = restaurantDataMapper.selectById(1L);
 
-        logger.info("Restaurant found: {}", restaurantFound.toString());
+        logger.info("Restaurant found: name: {} object: {}", restaurantFound.getName(), restaurantFound.toString());
 
         Address addressToInsert = new Address("CH", "2048", "Boot", "Loader", "42");
         Restaurant restaurantToInsert = new Restaurant.Builder()
@@ -45,6 +45,9 @@ public class Main {
         restaurantDataMapper.insert(restaurantToInsert);
 
         List<Restaurant> restaurantList = restaurantDataMapper.selectAll();
+
+        restaurantFound.setName("Eat Binary 2");
+        restaurantDataMapper.update(restaurantFound);
 
 
 

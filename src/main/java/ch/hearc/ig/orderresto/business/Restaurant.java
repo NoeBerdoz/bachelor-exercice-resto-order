@@ -35,12 +35,28 @@ public class Restaurant {
         return address;
     }
 
+    public Set<Product> getProductsCatalog() {
+        return productsCatalog;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Set<Product> getProductsCatalog() {
-        return productsCatalog;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public void setProductsCatalog(Set<Product> productsCatalog) {
+        this.productsCatalog = productsCatalog;
     }
 
     public void registerProduct(Product p) {
