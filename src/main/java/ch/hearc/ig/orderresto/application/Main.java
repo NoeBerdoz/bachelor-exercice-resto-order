@@ -2,8 +2,7 @@ package ch.hearc.ig.orderresto.application;
 
 import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.data.RestaurantDataMapper;
-import ch.hearc.ig.orderresto.presentation.MainCLI;
+import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.utils.OracleConnector;
 
 import org.slf4j.Logger;

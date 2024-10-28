@@ -1,12 +1,13 @@
-package ch.hearc.ig.orderresto.data;
+package ch.hearc.ig.orderresto.persistence.data;
 
 import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
+import ch.hearc.ig.orderresto.persistence.criteria.Condition;
+import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
 import ch.hearc.ig.orderresto.utils.OracleConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class RestaurantDataMapper {
                 Connection connection = OracleConnector.getConnectionFromPool();
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
-          statement.setLong(1, restaurant.getId());
+            statement.setLong(1, restaurant.getId());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -158,10 +159,51 @@ public class RestaurantDataMapper {
     }
 
     // Retrieve a Restaurant based on a search
-    public List<Restaurant> selectWhere() {
+    public List<Restaurant> selectWhere(Criteria criteria) {
         // TODO
 
-        return null;
+        StringBuilder sql = new StringBuilder("SELECT * FROM RESTAURANT");
+        List<Condition> conditions = criteria.getConditions();
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ");
+            for (Condition condition : conditions) {
+                sql.append(condition.getColumnName())
+                   .append(" ")
+                   .append(condition.getOperator())
+                   .append(" ? AND ");
+            }
+            // Remove the last " AND "
+            sql.setLength(sql.length() - 5);
+        }
+
+        List<Restaurant> foundRestaurants = new ArrayList<>();
+
+        try (
+                Connection connection = OracleConnector.getConnectionFromPool();
+                PreparedStatement statement = connection.prepareStatement(sql.toString())
+        ) {
+            int index = 1;
+
+            // Prepare SQL query dynamically
+            for (Condition condition : conditions) {
+                if (condition.getOperator().equals("LIKE")) {
+                    statement.setString(index++, condition.getValue().toString());
+                } else {
+                    statement.setObject(index++, condition.getValue());
+                }
+            }
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                foundRestaurants.add(mapToRestaurant(resultSet));
+            }
+
+            return foundRestaurants;
+
+        } catch (SQLException e) {
+            logger.error("Error while fetching restaurants: {}", e.getMessage());
+            return null;
+        }
     }
 
     // Map an SQL ResultSet to a Restaurant Java object.
