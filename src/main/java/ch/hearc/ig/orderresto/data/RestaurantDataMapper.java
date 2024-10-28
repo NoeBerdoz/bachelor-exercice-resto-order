@@ -68,7 +68,7 @@ public class RestaurantDataMapper {
 
         try (
                 Connection connection = OracleConnector.getConnectionFromPool();
-                PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"})
+                PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setString(1, restaurant.getName());
             statement.setString(2, restaurant.getAddress().getPostalCode());
@@ -80,10 +80,35 @@ public class RestaurantDataMapper {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                logger.info(ANSI_YELLOW + "[UPDATED]" + ANSI_RESET + " RESTAURANT WITH ID {}", restaurant.getId());
+                logger.info(ANSI_GREEN + "[UPDATED]" + ANSI_RESET + " RESTAURANT WITH ID {}", restaurant.getId());
             }
         } catch (SQLException e) {
             logger.error("Error while updating restaurant: {}", e.getMessage());
+        }
+    }
+
+    // Delete a Restaurant in the database based on its id
+    public boolean delete(Restaurant restaurant) {
+        String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
+
+        try (
+                Connection connection = OracleConnector.getConnectionFromPool();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+          statement.setLong(1, restaurant.getId());
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                logger.info(ANSI_RED + "[DELETED]" + ANSI_RESET + " RESTAURANT WITH ID {}", restaurant.getId());
+                return true;
+            } else {
+                logger.info(ANSI_YELLOW + "[DELETED]" + ANSI_RESET + " NO RESTAURANT FOUND WITH ID {}", restaurant.getId());
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error while deleting restaurant: {}", e.getMessage());
+            return false;
         }
     }
 
