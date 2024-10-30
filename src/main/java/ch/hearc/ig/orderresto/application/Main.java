@@ -2,6 +2,7 @@ package ch.hearc.ig.orderresto.application;
 
 import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
+import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.utils.OracleConnector;
 
@@ -30,7 +31,7 @@ public class Main {
         logger.info("Trying to get a restaurant by its ID");
         RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
 
-        Restaurant restaurantFound = restaurantDataMapper.selectById(1L);
+        Restaurant restaurantFound = restaurantDataMapper.selectById(2L);
 
         logger.info("Restaurant found: name: {} object: {}", restaurantFound.getName(), restaurantFound.toString());
 
@@ -47,6 +48,11 @@ public class Main {
 
         restaurantFound.setName("Eat Binary 2");
         restaurantDataMapper.update(restaurantFound);
+
+        restaurantDataMapper.delete(restaurantToInsert);
+        Criteria criteria = new Criteria();
+        criteria.add("=", "nom", "Eat Binary");
+        restaurantDataMapper.selectWhere(criteria);
 
 
 

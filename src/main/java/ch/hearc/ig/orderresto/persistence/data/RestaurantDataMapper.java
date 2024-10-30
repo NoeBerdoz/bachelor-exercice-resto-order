@@ -12,7 +12,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RestaurantDataMapper {
+public class RestaurantDataMapper implements DataMapper<Restaurant> {
     final String ANSI_RED = "\u001B[31m";
     final String ANSI_GREEN = "\u001B[32m";
     final String ANSI_YELLOW = "\u001B[33m";
@@ -28,6 +28,7 @@ public class RestaurantDataMapper {
     }
 
     // Insert a Restaurant to the database.
+    @Override
     public void insert(Restaurant restaurant) throws SQLException {
         // TODO insert the products of the restaurant
 
@@ -63,6 +64,7 @@ public class RestaurantDataMapper {
     }
 
     // Update a Restaurant in the database based on its id.
+    @Override
     public void update(Restaurant restaurant) {
 
         String sql = "UPDATE RESTAURANT SET nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ? WHERE numero = ?";
@@ -89,6 +91,7 @@ public class RestaurantDataMapper {
     }
 
     // Delete a Restaurant in the database based on its id
+    @Override
     public boolean delete(Restaurant restaurant) {
         String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
 
@@ -114,6 +117,7 @@ public class RestaurantDataMapper {
     }
 
     // Retrieve a Restaurant by its ID.
+    @Override
     public Restaurant selectById(Long id) throws SQLException {
         String sql = "SELECT * FROM RESTAURANT WHERE numero = ?";
 
@@ -126,13 +130,14 @@ public class RestaurantDataMapper {
 
         // Move cursor to the first result row
         if (resultSet.next()) {
-            return mapToRestaurant(resultSet);
+            return mapToObject(resultSet);
         }
 
         return null;
     }
 
     // Retrieves all restaurants from the database.
+    @Override
     public List<Restaurant> selectAll() throws SQLException {
 
         String sql = "SELECT * FROM RESTAURANT";
@@ -146,7 +151,7 @@ public class RestaurantDataMapper {
         ) {
             Integer countRestaurant = 0;
             while (resultSet.next()) {
-                Restaurant restaurant = mapToRestaurant(resultSet);
+                Restaurant restaurant = mapToObject(resultSet);
                 restaurants.add(restaurant);
                 countRestaurant++;
             }
@@ -159,10 +164,11 @@ public class RestaurantDataMapper {
     }
 
     // Retrieve a Restaurant based on a search
+    @Override
     public List<Restaurant> selectWhere(Criteria criteria) {
-        // TODO
 
         StringBuilder sql = new StringBuilder("SELECT * FROM RESTAURANT");
+
         List<Condition> conditions = criteria.getConditions();
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ");
@@ -192,12 +198,13 @@ public class RestaurantDataMapper {
                     statement.setObject(index++, condition.getValue());
                 }
             }
-
+            Integer countRestaurant = 0;
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                foundRestaurants.add(mapToRestaurant(resultSet));
+                foundRestaurants.add(mapToObject(resultSet));
+                countRestaurant++;
             }
-
+            logger.info(ANSI_MAGENTA + "[SELECTED]" + ANSI_RESET + " RESTAURANT COUNT {}", countRestaurant);
             return foundRestaurants;
 
         } catch (SQLException e) {
@@ -207,7 +214,7 @@ public class RestaurantDataMapper {
     }
 
     // Map an SQL ResultSet to a Restaurant Java object.
-    private Restaurant mapToRestaurant(ResultSet resultSet) throws SQLException {
+    public Restaurant mapToObject(ResultSet resultSet) throws SQLException {
 
         Address address = new Address(
                 resultSet.getString("pays"),
