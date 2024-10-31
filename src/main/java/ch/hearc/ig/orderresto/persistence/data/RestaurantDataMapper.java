@@ -16,10 +16,22 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     public RestaurantDataMapper() {
     }
 
+    private void populateStatementWithAllParameters(PreparedStatement statement, Restaurant restaurant) throws SQLException {
+        statement.setString(1, restaurant.getName());
+        statement.setString(2, restaurant.getAddress().getPostalCode());
+        statement.setString(3, restaurant.getAddress().getLocality());
+        statement.setString(4, restaurant.getAddress().getStreet());
+        statement.setString(5, restaurant.getAddress().getStreetNumber());
+        statement.setString(6, restaurant.getAddress().getCountryCode());
+    }
+
+    private void populateStatementWithIdParameter(PreparedStatement statement, Long id) throws SQLException {
+        statement.setLong(1, id);
+    }
+
     // Insert a Restaurant to the database.
     @Override
-    public void insert(Restaurant restaurant) throws SQLException {
-        // TODO insert the products of the restaurant
+    public void insert(Restaurant restaurant) {
 
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -27,12 +39,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
 
-            statement.setString(1, restaurant.getName());
-            statement.setString(2, restaurant.getAddress().getPostalCode());
-            statement.setString(3, restaurant.getAddress().getLocality());
-            statement.setString(4, restaurant.getAddress().getStreet());
-            statement.setString(5, restaurant.getAddress().getStreetNumber());
-            statement.setString(6, restaurant.getAddress().getCountryCode());
+            populateStatementWithAllParameters(statement, restaurant);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -62,13 +69,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            statement.setString(1, restaurant.getName());
-            statement.setString(2, restaurant.getAddress().getPostalCode());
-            statement.setString(3, restaurant.getAddress().getLocality());
-            statement.setString(4, restaurant.getAddress().getStreet());
-            statement.setString(5, restaurant.getAddress().getStreetNumber());
-            statement.setString(6, restaurant.getAddress().getCountryCode());
-            statement.setLong(7, restaurant.getId());
+            populateStatementWithAllParameters(statement, restaurant);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -88,7 +89,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            statement.setLong(1, restaurant.getId());
+            populateStatementWithIdParameter(statement, restaurant.getId());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -113,7 +114,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         Connection connection = DatabaseConnection.getConnection();
 
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setLong(1, id);
+        populateStatementWithIdParameter(statement, id);
 
         ResultSet resultSet = statement.executeQuery();
 
@@ -154,6 +155,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     }
 
     // Retrieve a Restaurant based on a search
+    // WARNING THIS IS NOT PROPERLY IMPLEMENTED
     @Override
     public List<Restaurant> selectWhere(Filter filter) {
 
