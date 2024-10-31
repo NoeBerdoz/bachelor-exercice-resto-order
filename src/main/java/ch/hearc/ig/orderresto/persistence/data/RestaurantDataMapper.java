@@ -5,24 +5,13 @@ import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.persistence.criteria.Condition;
 import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
 import ch.hearc.ig.orderresto.utils.OracleConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantDataMapper implements DataMapper<Restaurant> {
-    final String ANSI_RED = "\u001B[31m";
-    final String ANSI_GREEN = "\u001B[32m";
-    final String ANSI_YELLOW = "\u001B[33m";
-    final String ANSI_BLUE = "\u001B[34m";
-    final String ANSI_MAGENTA = "\u001B[35m";
-    final String ANSI_CYAN = "\u001B[36m";
-    final String ANSI_WHITE = "\u001B[37m";
-    final String ANSI_RESET = "\u001B[0m";
-    private static final Logger logger = LoggerFactory.getLogger(RestaurantDataMapper.class);
-
 
     public RestaurantDataMapper() {
     }
@@ -35,7 +24,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (
-                Connection connection = OracleConnector.getConnectionFromPool();
+                Connection connection = OracleConnector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"})
         ) {
             statement.setString(1, restaurant.getName());
@@ -53,12 +42,12 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 if (generatedKeys.next()) {
                     String generatedId = generatedKeys.getString(1);
                     restaurant.setId(Long.valueOf(generatedId));
-                    logger.info(ANSI_GREEN + "[INSERTED]" + ANSI_RESET + " RESTAURANT WITH ID {}", restaurant.getId());
+                    SimpleLogger.info("[INSERTED] RESTAURANT WITH ID: " + restaurant.getId());
                 }
             }
 
         } catch (SQLException e) {
-            logger.error("Error while inserting restaurant: {}", e.getMessage());
+            SimpleLogger.error("Error while inserting restaurant: " +  e.getMessage());
         }
 
     }
@@ -70,7 +59,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         String sql = "UPDATE RESTAURANT SET nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ? WHERE numero = ?";
 
         try (
-                Connection connection = OracleConnector.getConnectionFromPool();
+                Connection connection = OracleConnector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setString(1, restaurant.getName());
@@ -83,10 +72,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                logger.info(ANSI_GREEN + "[UPDATED]" + ANSI_RESET + " RESTAURANT WITH ID {}", restaurant.getId());
+                SimpleLogger.info("[UPDATED] RESTAURANT WITH ID: " + restaurant.getId());
             }
         } catch (SQLException e) {
-            logger.error("Error while updating restaurant: {}", e.getMessage());
+            SimpleLogger.error("Error while updating restaurant: " + e.getMessage());
         }
     }
 
@@ -96,22 +85,22 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
 
         try (
-                Connection connection = OracleConnector.getConnectionFromPool();
+                Connection connection = OracleConnector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setLong(1, restaurant.getId());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                logger.info(ANSI_RED + "[DELETED]" + ANSI_RESET + " RESTAURANT WITH ID {}", restaurant.getId());
+                SimpleLogger.info("[DELETED] RESTAURANT WITH ID: " + restaurant.getId());
                 return true;
             } else {
-                logger.info(ANSI_YELLOW + "[DELETED]" + ANSI_RESET + " NO RESTAURANT FOUND WITH ID {}", restaurant.getId());
+                SimpleLogger.info("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
                 return false;
             }
 
         } catch (SQLException e) {
-            logger.error("Error while deleting restaurant: {}", e.getMessage());
+            SimpleLogger.error("Error while deleting restaurant: " + e.getMessage());
             return false;
         }
     }
@@ -121,7 +110,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     public Restaurant selectById(Long id) throws SQLException {
         String sql = "SELECT * FROM RESTAURANT WHERE numero = ?";
 
-        Connection connection = OracleConnector.getConnectionFromPool();
+        Connection connection = OracleConnector.getConnection();
 
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1, id);
@@ -145,7 +134,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         List<Restaurant> restaurants = new ArrayList<>();
 
         try (
-                Connection connection = OracleConnector.getConnectionFromPool();
+                Connection connection = OracleConnector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()
         ) {
@@ -155,9 +144,9 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 restaurants.add(restaurant);
                 countRestaurant++;
             }
-            logger.info(ANSI_MAGENTA + "[SELECTED]" + ANSI_RESET + " RESTAURANT COUNT {}", countRestaurant);
+            SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
         } catch (SQLException e) {
-            logger.error("Error while fetching restaurants: {}", e.getMessage());
+            SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());
         }
 
         return restaurants;
@@ -185,7 +174,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         List<Restaurant> foundRestaurants = new ArrayList<>();
 
         try (
-                Connection connection = OracleConnector.getConnectionFromPool();
+                Connection connection = OracleConnector.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql.toString())
         ) {
             int index = 1;
@@ -204,11 +193,11 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 foundRestaurants.add(mapToObject(resultSet));
                 countRestaurant++;
             }
-            logger.info(ANSI_MAGENTA + "[SELECTED]" + ANSI_RESET + " RESTAURANT COUNT {}", countRestaurant);
+            SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
             return foundRestaurants;
 
         } catch (SQLException e) {
-            logger.error("Error while fetching restaurants: {}", e.getMessage());
+            SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());
             return null;
         }
     }

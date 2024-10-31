@@ -5,16 +5,12 @@ import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.utils.OracleConnector;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class Main {
-
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws SQLException {
 
@@ -24,16 +20,14 @@ public class Main {
         // Ensure the connection pool is always closed properly during application shutdown.
         // I will need to manage the database commits myself i think
 
-        OracleConnector.isDatabaseConnectable();
+        OracleConnector.getConnection();
 
-        OracleConnector.getConnectionFromPool();
-
-        logger.info("Trying to get a restaurant by its ID");
+        SimpleLogger.info("Trying to get a restaurant by its ID");
         RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
 
         Restaurant restaurantFound = restaurantDataMapper.selectById(2L);
 
-        logger.info("Restaurant found: name: {} object: {}", restaurantFound.getName(), restaurantFound.toString());
+        SimpleLogger.info("Restaurant found: " + restaurantFound.getName());
 
         Address addressToInsert = new Address("CH", "2048", "Boot", "Loader", "42");
         Restaurant restaurantToInsert = new Restaurant.Builder()
@@ -46,7 +40,7 @@ public class Main {
 
         List<Restaurant> restaurantList = restaurantDataMapper.selectAll();
 
-        restaurantFound.setName("Eat Binary 2");
+        restaurantFound.setName("Eat Binary 2 UPDATED");
         restaurantDataMapper.update(restaurantFound);
 
         restaurantDataMapper.delete(restaurantToInsert);
@@ -56,7 +50,7 @@ public class Main {
 
 
 
-        OracleConnector.closePool();
+        OracleConnector.closeConnection();
 
 //        (new MainCLI()).run();
     }
