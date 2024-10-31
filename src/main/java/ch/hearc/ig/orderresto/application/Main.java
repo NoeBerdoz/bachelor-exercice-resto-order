@@ -2,9 +2,9 @@ package ch.hearc.ig.orderresto.application;
 
 import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
+import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
-import ch.hearc.ig.orderresto.utils.OracleConnector;
+import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.SQLException;
@@ -16,11 +16,10 @@ public class Main {
 
         // TODO
         // Add validation/error handling for PropertiesLoader in case properties are missing or fail to load.
-        // Integrate a proper logging system (SLF4J with a logger implementation like Logback).
         // Ensure the connection pool is always closed properly during application shutdown.
         // I will need to manage the database commits myself i think
 
-        OracleConnector.getConnection();
+        DatabaseConnection.getConnection();
 
         SimpleLogger.info("Trying to get a restaurant by its ID");
         RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
@@ -44,13 +43,13 @@ public class Main {
         restaurantDataMapper.update(restaurantFound);
 
         restaurantDataMapper.delete(restaurantToInsert);
-        Criteria criteria = new Criteria();
-        criteria.add("=", "nom", "Eat Binary");
-        restaurantDataMapper.selectWhere(criteria);
+        Filter filter = new Filter();
+        filter.add("=", "nom", "Eat Binary");
+        restaurantDataMapper.selectWhere(filter);
 
 
 
-        OracleConnector.closeConnection();
+        DatabaseConnection.closeConnection();
 
 //        (new MainCLI()).run();
     }

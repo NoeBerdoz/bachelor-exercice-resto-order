@@ -1,9 +1,9 @@
-package ch.hearc.ig.orderresto.persistence.criteria;
+package ch.hearc.ig.orderresto.persistence.filter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Criteria {
+public class Filter {
     private List<Condition> conditions = new ArrayList<>();
 
     /* TODO

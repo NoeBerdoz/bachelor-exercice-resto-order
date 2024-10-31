@@ -1,4 +1,4 @@
-package ch.hearc.ig.orderresto.utils;
+package ch.hearc.ig.orderresto.persistence.connection;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,10 +1,12 @@
-package ch.hearc.ig.orderresto.utils;
+package ch.hearc.ig.orderresto.persistence.connection;
+
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class OracleConnector {
+public class DatabaseConnection {
 
     private static PropertiesLoader propertiesLoader = new PropertiesLoader("database.properties");
 

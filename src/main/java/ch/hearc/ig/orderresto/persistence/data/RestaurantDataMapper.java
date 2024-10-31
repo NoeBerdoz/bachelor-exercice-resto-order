@@ -2,9 +2,9 @@ package ch.hearc.ig.orderresto.persistence.data;
 
 import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.persistence.criteria.Condition;
-import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
-import ch.hearc.ig.orderresto.utils.OracleConnector;
+import ch.hearc.ig.orderresto.persistence.filter.Condition;
+import ch.hearc.ig.orderresto.persistence.filter.Filter;
+import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.*;
@@ -24,7 +24,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (
-                Connection connection = OracleConnector.getConnection();
+                Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"})
         ) {
             statement.setString(1, restaurant.getName());
@@ -59,7 +59,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         String sql = "UPDATE RESTAURANT SET nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ? WHERE numero = ?";
 
         try (
-                Connection connection = OracleConnector.getConnection();
+                Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setString(1, restaurant.getName());
@@ -85,7 +85,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
 
         try (
-                Connection connection = OracleConnector.getConnection();
+                Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setLong(1, restaurant.getId());
@@ -110,7 +110,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     public Restaurant selectById(Long id) throws SQLException {
         String sql = "SELECT * FROM RESTAURANT WHERE numero = ?";
 
-        Connection connection = OracleConnector.getConnection();
+        Connection connection = DatabaseConnection.getConnection();
 
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1, id);
@@ -134,7 +134,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         List<Restaurant> restaurants = new ArrayList<>();
 
         try (
-                Connection connection = OracleConnector.getConnection();
+                Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()
         ) {
@@ -154,11 +154,11 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     // Retrieve a Restaurant based on a search
     @Override
-    public List<Restaurant> selectWhere(Criteria criteria) {
+    public List<Restaurant> selectWhere(Filter filter) {
 
         StringBuilder sql = new StringBuilder("SELECT * FROM RESTAURANT");
 
-        List<Condition> conditions = criteria.getConditions();
+        List<Condition> conditions = filter.getConditions();
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ");
             for (Condition condition : conditions) {
@@ -174,7 +174,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         List<Restaurant> foundRestaurants = new ArrayList<>();
 
         try (
-                Connection connection = OracleConnector.getConnection();
+                Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql.toString())
         ) {
             int index = 1;

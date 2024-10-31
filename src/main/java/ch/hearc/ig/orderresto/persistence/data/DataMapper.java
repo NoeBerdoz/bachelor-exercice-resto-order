@@ -1,6 +1,6 @@
 package ch.hearc.ig.orderresto.persistence.data;
 
-import ch.hearc.ig.orderresto.persistence.criteria.Criteria;
+import ch.hearc.ig.orderresto.persistence.filter.Filter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ public interface DataMapper<T> {
 
     List<T> selectAll() throws SQLException;
 
-    List<T> selectWhere(Criteria criteria);
+    List<T> selectWhere(Filter filter);
 
     T mapToObject(ResultSet resultSet) throws SQLException;
 

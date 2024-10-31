@@ -1,4 +1,4 @@
-package ch.hearc.ig.orderresto.persistence.criteria;
+package ch.hearc.ig.orderresto.persistence.filter;
 
 public class Condition {
     private String operator;
