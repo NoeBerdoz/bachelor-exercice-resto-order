@@ -23,10 +23,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"})
-        ) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
+
             statement.setString(1, restaurant.getName());
             statement.setString(2, restaurant.getAddress().getPostalCode());
             statement.setString(3, restaurant.getAddress().getLocality());
@@ -47,7 +47,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             }
 
         } catch (SQLException e) {
-            SimpleLogger.error("Error while inserting restaurant: " +  e.getMessage());
+            SimpleLogger.error("Error while inserting restaurant: " + e.getMessage());
         }
 
     }
@@ -58,10 +58,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         String sql = "UPDATE RESTAURANT SET nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ? WHERE numero = ?";
 
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+
             statement.setString(1, restaurant.getName());
             statement.setString(2, restaurant.getAddress().getPostalCode());
             statement.setString(3, restaurant.getAddress().getLocality());
@@ -84,10 +84,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     public boolean delete(Restaurant restaurant) {
         String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
 
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+
             statement.setLong(1, restaurant.getId());
 
             int affectedRows = statement.executeUpdate();
@@ -133,11 +133,12 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         List<Restaurant> restaurants = new ArrayList<>();
 
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()
-        ) {
+        try {
+
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+
             Integer countRestaurant = 0;
             while (resultSet.next()) {
                 Restaurant restaurant = mapToObject(resultSet);
@@ -163,9 +164,9 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             sql.append(" WHERE ");
             for (Condition condition : conditions) {
                 sql.append(condition.getColumnName())
-                   .append(" ")
-                   .append(condition.getOperator())
-                   .append(" ? AND ");
+                        .append(" ")
+                        .append(condition.getOperator())
+                        .append(" ? AND ");
             }
             // Remove the last " AND "
             sql.setLength(sql.length() - 5);
@@ -173,10 +174,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         List<Restaurant> foundRestaurants = new ArrayList<>();
 
-        try (
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql.toString())
-        ) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql.toString());
+
             int index = 1;
 
             // Prepare SQL query dynamically

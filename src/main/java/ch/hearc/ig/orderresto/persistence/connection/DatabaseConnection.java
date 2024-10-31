@@ -18,7 +18,7 @@ public class DatabaseConnection {
 
     // Singleton database connection, creates it if necessary.
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
+        if (connection == null) {
             try {
                 connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 SimpleLogger.info("Connection established!");
