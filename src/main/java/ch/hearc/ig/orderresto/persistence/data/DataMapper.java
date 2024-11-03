@@ -5,15 +5,16 @@ import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public interface DataMapper<T> {
-    void insert(T entity) throws SQLException;
+    boolean insert(T entity) throws SQLException;
 
-    void update(T entity);
+    boolean update(T entity) throws SQLException;
 
     boolean delete(T entity);
 
-    T selectById(Long id) throws SQLException;
+    Optional<T> selectById(Long id) throws SQLException;
 
     List<T> selectAll() throws SQLException;
 

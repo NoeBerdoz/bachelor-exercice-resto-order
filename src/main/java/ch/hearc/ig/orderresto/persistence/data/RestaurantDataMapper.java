@@ -10,28 +10,34 @@ import ch.hearc.ig.orderresto.utils.SimpleLogger;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     public RestaurantDataMapper() {
     }
 
-    private void populateStatementWithAllParameters(PreparedStatement statement, Restaurant restaurant) throws SQLException {
-        statement.setString(1, restaurant.getName());
-        statement.setString(2, restaurant.getAddress().getPostalCode());
-        statement.setString(3, restaurant.getAddress().getLocality());
-        statement.setString(4, restaurant.getAddress().getStreet());
-        statement.setString(5, restaurant.getAddress().getStreetNumber());
-        statement.setString(6, restaurant.getAddress().getCountryCode());
-    }
-
-    private void populateStatementWithIdParameter(PreparedStatement statement, Long id) throws SQLException {
-        statement.setLong(1, id);
+    // Bind parameters to a prepared statement.
+    private void bindStatementParameters(PreparedStatement statement, List<Object> sqlParameters) {
+        for (int i = 0; i < sqlParameters.size(); i++) {
+            Object parameter = sqlParameters.get(i);
+            try {
+                if (parameter instanceof String) {
+                    statement.setString(i + 1, (String) parameter);
+                } else if (parameter instanceof Long) {
+                    statement.setLong(i + 1, (Long) parameter);
+                } else {
+                    statement.setObject(i + 1, parameter);
+                }
+            } catch (SQLException e) {
+                SimpleLogger.error("Error while populating statement: " + e.getMessage());
+            }
+        }
     }
 
     // Insert a Restaurant to the database.
     @Override
-    public void insert(Restaurant restaurant) {
+    public boolean insert(Restaurant restaurant) {
 
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -39,7 +45,14 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
 
-            populateStatementWithAllParameters(statement, restaurant);
+            bindStatementParameters(statement, List.of(
+                    restaurant.getName(),
+                    restaurant.getAddress().getPostalCode(),
+                    restaurant.getAddress().getLocality(),
+                    restaurant.getAddress().getStreet(),
+                    restaurant.getAddress().getStreetNumber(),
+                    restaurant.getAddress().getCountryCode()
+            ));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -50,6 +63,8 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                     String generatedId = generatedKeys.getString(1);
                     restaurant.setId(Long.valueOf(generatedId));
                     SimpleLogger.info("[INSERTED] RESTAURANT WITH ID: " + restaurant.getId());
+
+                    return true;
                 }
             }
 
@@ -57,11 +72,12 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             SimpleLogger.error("Error while inserting restaurant: " + e.getMessage());
         }
 
+        return false;
     }
 
     // Update a Restaurant in the database based on its id.
     @Override
-    public void update(Restaurant restaurant) {
+    public boolean update(Restaurant restaurant) throws SQLException {
 
         String sql = "UPDATE RESTAURANT SET nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ? WHERE numero = ?";
 
@@ -69,15 +85,29 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            populateStatementWithAllParameters(statement, restaurant);
+            bindStatementParameters(statement, List.of(
+                    restaurant.getName(),
+                    restaurant.getAddress().getPostalCode(),
+                    restaurant.getAddress().getLocality(),
+                    restaurant.getAddress().getStreet(),
+                    restaurant.getAddress().getStreetNumber(),
+                    restaurant.getAddress().getCountryCode(),
+                    restaurant.getId()
+            ));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
                 SimpleLogger.info("[UPDATED] RESTAURANT WITH ID: " + restaurant.getId());
+                return true;
+            } else {
+                SimpleLogger.warning("[UPDATED] NO RESTAURANT TO UPDATE WITH ID: " + restaurant.getId());
             }
         } catch (SQLException e) {
             SimpleLogger.error("Error while updating restaurant: " + e.getMessage());
+            throw e;
         }
+
+        return false;
     }
 
     // Delete a Restaurant in the database based on its id
@@ -89,7 +119,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            populateStatementWithIdParameter(statement, restaurant.getId());
+            bindStatementParameters(statement, List.of(restaurant.getId()));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -97,38 +127,43 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 return true;
             } else {
                 SimpleLogger.info("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
-                return false;
             }
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while deleting restaurant: " + e.getMessage());
-            return false;
         }
+
+        return false;
     }
 
     // Retrieve a Restaurant by its ID.
     @Override
-    public Restaurant selectById(Long id) throws SQLException {
+    public Optional<Restaurant> selectById(Long id) {
         String sql = "SELECT * FROM RESTAURANT WHERE numero = ?";
 
-        Connection connection = DatabaseConnection.getConnection();
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            bindStatementParameters(statement, List.of(id));
 
-        PreparedStatement statement = connection.prepareStatement(sql);
-        populateStatementWithIdParameter(statement, id);
+            ResultSet resultSet = statement.executeQuery();
 
-        ResultSet resultSet = statement.executeQuery();
+            // Move cursor to the first result row
+            if (resultSet.next()) {
+                return Optional.of(mapToObject(resultSet));
+            }
 
-        // Move cursor to the first result row
-        if (resultSet.next()) {
-            return mapToObject(resultSet);
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while fetching restaurant by ID: " + e.getMessage());
         }
 
-        return null;
+        return Optional.empty();
+
     }
 
     // Retrieves all restaurants from the database.
     @Override
-    public List<Restaurant> selectAll() throws SQLException {
+    public List<Restaurant> selectAll() {
 
         String sql = "SELECT * FROM RESTAURANT";
 

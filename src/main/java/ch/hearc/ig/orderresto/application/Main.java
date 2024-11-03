@@ -5,10 +5,12 @@ import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.presentation.MainCLI;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
 
@@ -24,9 +26,13 @@ public class Main {
         SimpleLogger.info("Trying to get a restaurant by its ID");
         RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
 
-        Restaurant restaurantFound = restaurantDataMapper.selectById(2L);
+        Optional<Restaurant> restaurantFound = restaurantDataMapper.selectById(2L);
 
-        SimpleLogger.info("Restaurant found: " + restaurantFound.getName());
+        if (restaurantFound.isEmpty()) {
+            SimpleLogger.error("Restaurant not found");
+        } else {
+            SimpleLogger.info("Restaurant found: " + restaurantFound.get().getName());
+        }
 
         Address addressToInsert = new Address("CH", "2048", "Boot", "Loader", "42");
         Restaurant restaurantToInsert = new Restaurant.Builder()
@@ -39,18 +45,17 @@ public class Main {
 
         List<Restaurant> restaurantList = restaurantDataMapper.selectAll();
 
-        restaurantFound.setName("Eat Binary 2 UPDATED");
-        restaurantDataMapper.update(restaurantFound);
+        restaurantToInsert.setName("Eat Binary 2 UPDATED");
+        restaurantDataMapper.update(restaurantToInsert);
 
         restaurantDataMapper.delete(restaurantToInsert);
+
         Filter filter = new Filter();
         filter.add("=", "nom", "Eat Binary");
         restaurantDataMapper.selectWhere(filter);
 
-
-
         DatabaseConnection.closeConnection();
 
-//        (new MainCLI()).run();
+        (new MainCLI()).run();
     }
 }
