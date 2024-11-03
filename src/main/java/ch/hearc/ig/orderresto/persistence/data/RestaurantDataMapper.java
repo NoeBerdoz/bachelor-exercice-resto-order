@@ -5,6 +5,7 @@ import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.persistence.filter.Condition;
 import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.*;
@@ -17,24 +18,6 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     public RestaurantDataMapper() {
     }
 
-    // Bind parameters to a prepared statement.
-    private void bindStatementParameters(PreparedStatement statement, Object... sqlParameters) {
-        for (int i = 0; i < sqlParameters.length; i++) {
-            Object parameter = sqlParameters[i];
-            try {
-                if (parameter instanceof String) {
-                    statement.setString(i + 1, (String) parameter);
-                } else if (parameter instanceof Long) {
-                    statement.setLong(i + 1, (Long) parameter);
-                } else {
-                    statement.setObject(i + 1, parameter);
-                }
-            } catch (SQLException e) {
-                SimpleLogger.error("Error while binding statement: " + e.getMessage());
-            }
-        }
-    }
-
     // Insert a Restaurant to the database.
     @Override
     public boolean insert(Restaurant restaurant) {
@@ -45,7 +28,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
 
-            bindStatementParameters(
+            StatementHelper.bindStatementParameters(
                     statement,
                     restaurant.getName(),
                     restaurant.getAddress().getPostalCode(),
@@ -86,7 +69,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            bindStatementParameters(
+            StatementHelper.bindStatementParameters(
                     statement,
                     restaurant.getName(),
                     restaurant.getAddress().getPostalCode(),
@@ -121,7 +104,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            bindStatementParameters(statement, restaurant.getId());
+            StatementHelper.bindStatementParameters(statement, restaurant.getId());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -146,7 +129,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         try {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
-            bindStatementParameters(statement, id);
+            StatementHelper.bindStatementParameters(statement, id);
 
             ResultSet resultSet = statement.executeQuery();
 
