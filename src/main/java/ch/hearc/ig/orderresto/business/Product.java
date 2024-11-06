@@ -47,6 +47,30 @@ public class Product {
         return restaurant;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -60,5 +84,44 @@ public class Product {
 
     public void addOrder(Order order) {
         this.orders.add(order);
+    }
+
+    public static class Builder {
+        private Long id;
+        private String name;
+        private BigDecimal unitPrice;
+        private String description;
+        private Restaurant restaurant;
+        // TODO add Order logic
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withUnitPrice(BigDecimal unitPrice) {
+            this.unitPrice = unitPrice;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withRestaurant(Restaurant restaurant) {
+            this.restaurant = restaurant;
+            return this;
+        }
+
+        public Product build() {
+            return new Product(this.id, this.name, this.unitPrice, this.description, this.restaurant);
+        }
+
     }
 }

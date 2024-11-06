@@ -1,13 +1,16 @@
 package ch.hearc.ig.orderresto.application;
 
 import ch.hearc.ig.orderresto.business.Address;
+import ch.hearc.ig.orderresto.business.Product;
 import ch.hearc.ig.orderresto.business.Restaurant;
+import ch.hearc.ig.orderresto.persistence.data.ProductDataMapper;
 import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
 import ch.hearc.ig.orderresto.presentation.MainCLI;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +27,9 @@ public class Main {
         DatabaseConnection.getConnection();
 
         SimpleLogger.info("Trying to get a restaurant by its ID");
+
         RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
+        ProductDataMapper productDataMapper = new ProductDataMapper();
 
         Optional<Restaurant> restaurantFound = restaurantDataMapper.selectById(2L);
 
@@ -53,6 +58,24 @@ public class Main {
         Filter filter = new Filter();
         filter.add("=", "nom", "Eat Binary");
         restaurantDataMapper.selectWhere(filter);
+
+        Restaurant restaurantThatHasProduct = new Restaurant.Builder()
+                .withId(1L)
+                .withName("Brioche Master")
+                .withAddress(addressToInsert)
+                .build();
+
+        restaurantDataMapper.insert(restaurantThatHasProduct);
+
+        Product productToInsert = new Product.Builder()
+                .withId(1L)
+                .withName("Brioche")
+                .withUnitPrice(BigDecimal.valueOf(2.9))
+                .withDescription("Leger")
+                .withRestaurant(restaurantThatHasProduct)
+                .build();
+
+        productDataMapper.insert(productToInsert);
 
         DatabaseConnection.closeConnection();
 

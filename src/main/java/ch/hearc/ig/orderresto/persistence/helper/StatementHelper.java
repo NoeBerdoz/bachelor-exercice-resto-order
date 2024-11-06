@@ -2,6 +2,7 @@ package ch.hearc.ig.orderresto.persistence.helper;
 
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -16,6 +17,8 @@ public class StatementHelper {
                     statement.setString(i + 1, (String) parameter);
                 } else if (parameter instanceof Long) {
                     statement.setLong(i + 1, (Long) parameter);
+                } else if (parameter instanceof BigDecimal) {
+                    statement.setBigDecimal(i + 1, (BigDecimal) parameter);
                 } else {
                     statement.setObject(i + 1, parameter);
                 }
