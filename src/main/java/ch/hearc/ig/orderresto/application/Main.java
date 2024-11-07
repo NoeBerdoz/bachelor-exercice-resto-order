@@ -22,7 +22,8 @@ public class Main {
         // TODO
         // Add validation/error handling for PropertiesLoader in case properties are missing or fail to load.
         // Ensure the connection pool is always closed properly during application shutdown.
-        // I will need to manage the database commits myself i think
+        // I will need to manage the database commits myself i think it's currently on auto-commit.
+        // Identity Map pattern integration
 
         DatabaseConnection.getConnection();
 
@@ -67,15 +68,42 @@ public class Main {
 
         restaurantDataMapper.insert(restaurantThatHasProduct);
 
-        Product productToInsert = new Product.Builder()
+        Product productToInsert1 = new Product.Builder()
                 .withId(1L)
-                .withName("Brioche")
+                .withName("Salade")
                 .withUnitPrice(BigDecimal.valueOf(2.9))
-                .withDescription("Leger")
+                .withDescription("Verte")
                 .withRestaurant(restaurantThatHasProduct)
                 .build();
 
-        productDataMapper.insert(productToInsert);
+        Product productToInsert2 = new Product.Builder()
+                .withId(1L)
+                .withName("Pain")
+                .withUnitPrice(BigDecimal.valueOf(1.3))
+                .withDescription("Sec")
+                .withRestaurant(restaurantThatHasProduct)
+                .build();
+
+        Product productToInsert3 = new Product.Builder()
+                .withId(1L)
+                .withName("Fromage")
+                .withUnitPrice(BigDecimal.valueOf(1.3))
+                .withDescription("Bleu")
+                .withRestaurant(restaurantThatHasProduct)
+                .build();
+
+        productDataMapper.insert(productToInsert1);
+        productDataMapper.insert(productToInsert2);
+        productDataMapper.insert(productToInsert3);
+
+        productToInsert2.setName("Pain UPDATED");
+        productDataMapper.update(productToInsert2);
+
+        productDataMapper.delete(productToInsert3);
+
+        Product productFound = productDataMapper.selectById(21L).orElseThrow();
+
+        SimpleLogger.info("Product found: " + productFound.getName());
 
         DatabaseConnection.closeConnection();
 
