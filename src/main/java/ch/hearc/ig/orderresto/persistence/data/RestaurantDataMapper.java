@@ -9,13 +9,17 @@ import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
-    public RestaurantDataMapper() {
+    private static final RestaurantDataMapper instance = new RestaurantDataMapper();
+    private final Map<Long, Restaurant> cache = new HashMap<>();
+
+    public RestaurantDataMapper() {}
+
+    public static RestaurantDataMapper getInstance() {
+        return instance;
     }
 
     // Insert a Restaurant to the database.
@@ -47,6 +51,8 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                     String generatedId = generatedKeys.getString(1);
                     restaurant.setId(Long.valueOf(generatedId));
                     SimpleLogger.info("[INSERTED] RESTAURANT WITH ID: " + restaurant.getId());
+
+                    cache.put(restaurant.getId(), restaurant);
 
                     return true;
                 }
@@ -83,6 +89,9 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
                 SimpleLogger.info("[UPDATED] RESTAURANT WITH ID: " + restaurant.getId());
+
+                cache.put(restaurant.getId(), restaurant);
+
                 return true;
             } else {
                 SimpleLogger.warning("[UPDATED] NO RESTAURANT TO UPDATE WITH ID: " + restaurant.getId());
@@ -109,6 +118,9 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
                 SimpleLogger.info("[DELETED] RESTAURANT WITH ID: " + restaurant.getId());
+
+                cache.remove(restaurant.getId());
+
                 return true;
             } else {
                 SimpleLogger.info("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
@@ -124,6 +136,12 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     // Retrieve a Restaurant by its ID.
     @Override
     public Optional<Restaurant> selectById(Long id) {
+
+        // Check the cache first
+        if (cache.containsKey(id)) {
+            return Optional.of(cache.get(id));
+        }
+
         String sql = "SELECT * FROM RESTAURANT WHERE numero = ?";
 
         try {
@@ -135,7 +153,11 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
             // Move cursor to the first result row
             if (resultSet.next()) {
-                return Optional.of(mapToObject(resultSet));
+                Restaurant restaurant = mapToObject(resultSet);
+
+                cache.put(restaurant.getId(), restaurant);
+
+                return Optional.of(restaurant);
             }
 
         } catch (SQLException e) {
@@ -155,7 +177,6 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         List<Restaurant> restaurants = new ArrayList<>();
 
         try {
-
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
@@ -164,6 +185,9 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             while (resultSet.next()) {
                 Restaurant restaurant = mapToObject(resultSet);
                 restaurants.add(restaurant);
+
+                cache.put(restaurant.getId(), restaurant);
+
                 countRestaurant++;
             }
             SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
@@ -174,9 +198,26 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         return restaurants;
     }
 
+    // Map an SQL ResultSet to a Restaurant Java object.
+    public Restaurant mapToObject(ResultSet resultSet) throws SQLException {
+
+        Address address = new Address(
+                resultSet.getString("pays"),
+                resultSet.getString("code_postal"),
+                resultSet.getString("localite"),
+                resultSet.getString("rue"),
+                resultSet.getString("num_rue")
+        );
+
+        return new Restaurant.Builder()
+                .withId(resultSet.getLong("numero"))
+                .withName(resultSet.getString("nom"))
+                .withAddress(address)
+                .build();
+    }
+
     // Retrieve a Restaurant based on a search
     // WARNING THIS IS NOT PROPERLY IMPLEMENTED
-    @Override
     public List<Restaurant> selectWhere(Filter filter) {
 
         StringBuilder sql = new StringBuilder("SELECT * FROM RESTAURANT");
@@ -223,24 +264,6 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());
             return null;
         }
-    }
-
-    // Map an SQL ResultSet to a Restaurant Java object.
-    public Restaurant mapToObject(ResultSet resultSet) throws SQLException {
-
-        Address address = new Address(
-                resultSet.getString("pays"),
-                resultSet.getString("code_postal"),
-                resultSet.getString("localite"),
-                resultSet.getString("rue"),
-                resultSet.getString("num_rue")
-        );
-
-        return new Restaurant.Builder()
-                .withId(resultSet.getLong("numero"))
-                .withName(resultSet.getString("nom"))
-                .withAddress(address)
-                .build();
     }
 
 }
