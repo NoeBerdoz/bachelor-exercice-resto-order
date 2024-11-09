@@ -39,6 +39,26 @@ public abstract class Customer {
         return address;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
     public void addOrder(Order order) {
         this.orders.add(order);
     }
