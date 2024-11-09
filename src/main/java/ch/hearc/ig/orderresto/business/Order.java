@@ -53,8 +53,74 @@ public class Order {
         return totalAmount;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public void setProducts(Set<Product> products) {
+        this.products = products;
+    }
+
+    public void setTakeAway(Boolean takeAway) {
+        this.takeAway = takeAway;
+    }
+
+    public void setWhen(LocalDateTime when) {
+        this.when = when;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
     public void addProduct(Product product) {
         this.products.add(product);
         this.totalAmount = this.totalAmount.add(product.getUnitPrice());
     }
+
+    public static class Builder {
+        private Long id;
+        private Customer customer;
+        private Restaurant restaurant;
+        private Boolean takeAway;
+        private LocalDateTime when;
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withCustomer(Customer customer) {
+            this.customer = customer;
+            return this;
+        }
+
+        public Builder withRestaurant(Restaurant restaurant) {
+            this.restaurant = restaurant;
+            return this;
+        }
+
+        public Builder withTakeAway(Boolean takeAway) {
+            this.takeAway = takeAway;
+            return this;
+        }
+
+        public Builder withWhen(LocalDateTime when) {
+            this.when = when;
+            return this;
+        }
+
+        public Order build() {
+            return new Order(this.id, this.customer, this.restaurant, this.takeAway, this.when);
+        }
+    }
+
 }
