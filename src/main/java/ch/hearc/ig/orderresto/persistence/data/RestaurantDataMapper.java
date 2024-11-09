@@ -113,7 +113,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            StatementHelper.bindStatementParameters(statement, restaurant.getId());
+            StatementHelper.bindStatementParameters(
+                    statement,
+                    restaurant.getId()
+            );
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -123,7 +126,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
                 return true;
             } else {
-                SimpleLogger.info("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
+                SimpleLogger.warning("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
             }
 
         } catch (SQLException e) {

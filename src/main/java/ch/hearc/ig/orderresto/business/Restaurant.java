@@ -91,7 +91,7 @@ public class Restaurant {
         }
 
         public Restaurant build() {
-            return new Restaurant(id, name, address);
+            return new Restaurant(this.id, this.name, this.address);
         }
     }
 

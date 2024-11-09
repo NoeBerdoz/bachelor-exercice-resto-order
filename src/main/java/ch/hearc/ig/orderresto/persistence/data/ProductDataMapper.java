@@ -119,7 +119,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                 return true;
             } else {
-                SimpleLogger.info("[DELETED] NO PRODUCT FOUND WITH ID: " + product.getId());
+                SimpleLogger.warning("[DELETED] NO PRODUCT FOUND WITH ID: " + product.getId());
             }
 
         } catch (SQLException e) {

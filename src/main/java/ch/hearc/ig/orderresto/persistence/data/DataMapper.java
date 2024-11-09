@@ -12,7 +12,7 @@ public interface DataMapper<T> {
 
     boolean delete(T entity);
 
-    Optional<T> selectById(Long id) throws SQLException;
+    Optional<T> selectById(Long id);
 
     List<T> selectAll() throws SQLException;
 
