@@ -201,6 +201,38 @@ public class ProductDataMapper implements DataMapper<Product> {
         return products;
     }
 
+    public Set<Product> selectWhereRestaurantId(Long restaurantId) throws SQLException {
+        // TODO make this cache compliant
+
+        String sql = "SELECT * FROM PRODUIT WHERE FK_RESTO = ?";
+
+        Set<Product> products = new HashSet<>();
+
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            StatementHelper.bindStatementParameters(statement, restaurantId);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            Integer countProduct = 0;
+            while (resultSet.next()) {
+                Product product = mapToObject(resultSet);
+                products.add(product);
+
+                cache.put(product.getId(), product);
+
+                countProduct++;
+            }
+            SimpleLogger.info("[SELECTED] PRODUCT COUNT: " + countProduct);
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while fetching products: " + e.getMessage());
+            throw e;
+        }
+
+        return products;
+    }
+
     @Override
     public Product mapToObject(ResultSet resultSet) throws SQLException {
 
