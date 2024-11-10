@@ -14,45 +14,99 @@ import java.util.Set;
 
 public class RestaurantService {
 
+    private static RestaurantService instance;
+    private RestaurantService() {}
+
+    public static RestaurantService getInstance() {
+        if(instance == null) {
+            instance = new RestaurantService();
+        }
+        return instance;
+    }
+
     private final RestaurantDataMapper restaurantDataMapper = RestaurantDataMapper.getInstance();
     private final OrderDataMapper orderDataMapper = OrderDataMapper.getInstance();
     private final ProductDataMapper productDataMapper = ProductDataMapper.getInstance();
 
-    public Set<Order> getOrdersFromRestaurant(Restaurant restaurant) throws SQLException {
+    public Set<Order> getOrdersFromRestaurant(Restaurant restaurant) {
+        Set<Order> orders = null;
 
-        Set<Order> orders = orderDataMapper.selectWhereRestaurantId(restaurant.getId());
-        restaurant.setOrders(orders);
+        try {
+            orders = orderDataMapper.selectWhereRestaurantId(restaurant.getId());
+            restaurant.setOrders(orders);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         return orders;
-
     }
 
-    public Set<Product> getProductFromRestaurant(Restaurant restaurant) throws SQLException {
+    public Set<Product> getProductsFromRestaurant(Restaurant restaurant) {
+        Set<Product> products = null;
 
-        Set<Product> products = productDataMapper.selectWhereRestaurantId(restaurant.getId());
-        restaurant.setProductsCatalog(products);
+        try {
+            products = productDataMapper.selectWhereRestaurantId(restaurant.getId());
+            restaurant.setProductsCatalog(products);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         return products;
     }
 
-    public boolean addRestaurant(Restaurant restaurant) throws SQLException {
-        return restaurantDataMapper.insert(restaurant);
+    public boolean addRestaurant(Restaurant restaurant) {
+
+        try {
+            return restaurantDataMapper.insert(restaurant);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
-    public boolean modifyRestaurant(Restaurant restaurant) throws SQLException {
-        return restaurantDataMapper.update(restaurant);
+    public boolean modifyRestaurant(Restaurant restaurant) {
+
+        try {
+            return restaurantDataMapper.update(restaurant);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
-    public boolean removeRestaurant(Restaurant restaurant) throws SQLException {
-        return restaurantDataMapper.delete(restaurant);
+    public boolean removeRestaurant(Restaurant restaurant) {
+
+        try {
+            return restaurantDataMapper.delete(restaurant);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
-    public Optional<Restaurant> getRestaurantById(Long id) throws SQLException {
-        return restaurantDataMapper.selectById(id);
+    public Optional<Restaurant> getRestaurantById(Long id) {
+
+        try {
+            return restaurantDataMapper.selectById(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
     }
 
-    public List<Restaurant> getAllRestaurants() throws SQLException {
-        return restaurantDataMapper.selectAll();
+    public List<Restaurant> getAllRestaurants() {
+
+        try {
+            return restaurantDataMapper.selectAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return List.of();
     }
 
 }
