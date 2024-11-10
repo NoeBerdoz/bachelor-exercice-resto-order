@@ -38,7 +38,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                     restaurant.getAddress().getPostalCode(),
                     restaurant.getAddress().getLocality(),
                     restaurant.getAddress().getStreet(),
-                    restaurant.getAddress().getStreetNumber(),
+                    restaurant.getAddress().getStreetNumber() != null ? restaurant.getAddress().getStreetNumber() : null,
                     restaurant.getAddress().getCountryCode()
             );
 
@@ -82,7 +82,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                     restaurant.getAddress().getPostalCode(),
                     restaurant.getAddress().getLocality(),
                     restaurant.getAddress().getStreet(),
-                    restaurant.getAddress().getStreetNumber(),
+                    restaurant.getAddress().getStreetNumber() != null ? restaurant.getAddress().getStreetNumber() : null,
                     restaurant.getAddress().getCountryCode(),
                     restaurant.getId()
             );

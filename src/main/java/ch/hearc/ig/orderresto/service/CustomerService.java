@@ -1,11 +1,16 @@
 package ch.hearc.ig.orderresto.service;
 
 import ch.hearc.ig.orderresto.business.Customer;
+import ch.hearc.ig.orderresto.business.Order;
+import ch.hearc.ig.orderresto.business.PrivateCustomer;
 import ch.hearc.ig.orderresto.persistence.data.CustomerDataMapper;
+import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class CustomerService {
 
@@ -20,11 +25,32 @@ public class CustomerService {
     }
 
     private final CustomerDataMapper customerDataMapper = CustomerDataMapper.getInstance();
+    private final OrderDataMapper orderDataMapper = OrderDataMapper.getInstance();
 
-
-    public boolean addCustomer(Customer customer) {
+    public Set<Order> getOrdersFromCustomer(Customer customer) {
+        Set<Order> orders = null;
 
         try {
+            orders = orderDataMapper.selectWhereCustomerId(customer.getId());
+            customer.setOrders(orders);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return orders;
+    }
+
+    public boolean addCustomer(Customer customer) {
+        try {
+            // Manage the already present technical debt given with the exercise
+            // Gender in database is a char "O" or "N" and in the application it's "F" or "M"
+            if (customer instanceof PrivateCustomer) {
+                if (Objects.equals(((PrivateCustomer) customer).getGender(), "F")) {
+                    ((PrivateCustomer) customer).setGender("O");
+                } else {
+                    ((PrivateCustomer) customer).setGender("N");
+                }
+            }
             return customerDataMapper.insert(customer);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,7 +70,7 @@ public class CustomerService {
         return false;
     }
 
-    public boolean remvoeCustomer(Customer customer) {
+    public boolean removeCustomer(Customer customer) {
 
         try {
             return customerDataMapper.delete(customer);

@@ -20,7 +20,7 @@ public class FakeDb {
             FakeDb.customers.add(customer1);
 
             Address address2 = new Address("CH", "2000", "Neuchâtel", "Rue du test", "5b");
-            OrganizationCustomer customer2 = new OrganizationCustomer(null, "+41 32 000 00 00", "info@rhne.ch", address2, "Hôpital Pourtales", "SA");
+            OrganizationCustomer customer2 = new OrganizationCustomer(null, "+41 32 000 00 00", "test@gmail.com", address2, "Hôpital Pourtales", "SA");
             FakeDb.customers.add(customer2);
         }
         return FakeDb.customers;

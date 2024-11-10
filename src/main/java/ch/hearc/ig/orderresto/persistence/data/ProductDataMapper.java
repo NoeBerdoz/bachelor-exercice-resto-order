@@ -14,7 +14,7 @@ import java.util.*;
 public class ProductDataMapper implements DataMapper<Product> {
 
     private static final ProductDataMapper instance = new ProductDataMapper();
-    private final Map<Long, Product> cache = new HashMap<>();
+    public final Map<Long, Product> cache = new HashMap<>();
 
     public ProductDataMapper() {}
 

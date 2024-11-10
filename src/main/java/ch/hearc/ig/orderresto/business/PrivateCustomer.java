@@ -24,4 +24,8 @@ public class PrivateCustomer extends Customer {
     public String getLastName() {
         return lastName;
     }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 }

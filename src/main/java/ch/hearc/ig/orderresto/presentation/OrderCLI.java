@@ -4,7 +4,13 @@ import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.business.Product;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.persistence.FakeDb;
+import ch.hearc.ig.orderresto.presentation.AbstractCLI;
+import ch.hearc.ig.orderresto.presentation.CustomerCLI;
+import ch.hearc.ig.orderresto.presentation.MainCLI;
+import ch.hearc.ig.orderresto.presentation.ProductCLI;
+import ch.hearc.ig.orderresto.presentation.RestaurantCLI;
+import ch.hearc.ig.orderresto.service.CustomerService;
+import ch.hearc.ig.orderresto.service.RestaurantService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +40,7 @@ public class OrderCLI extends AbstractCLI {
             customer = customerCLI.getExistingCustomer();
         } else {
             customer = customerCLI.createNewCustomer();
-            FakeDb.addCustomer(customer);
+            CustomerService.getInstance().addCustomer(customer);
         }
 
         // Possible improvements:
@@ -59,7 +65,8 @@ public class OrderCLI extends AbstractCLI {
             this.ln(String.format("Désolé, nous ne connaissons pas cette personne."));
             return null;
         }
-        Object[] orders = customer.getOrders().toArray();
+        //Object[] orders = customer.getOrders().toArray();
+        Object[] orders = CustomerService.getInstance().getOrdersFromCustomer(customer).toArray();
         if (orders.length == 0) {
             this.ln(String.format("Désolé, il n'y a aucune commande pour %s", customer.getEmail()));
             return null;

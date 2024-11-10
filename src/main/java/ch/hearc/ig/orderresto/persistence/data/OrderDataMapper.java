@@ -13,10 +13,8 @@ import java.util.*;
 
 public class OrderDataMapper implements DataMapper<Order> {
 
-    // TODO add the logic with PRODUIT_COMMANDE associative table
-
     private static final OrderDataMapper instance = new OrderDataMapper();
-    private final Map<Long, Order> cache = new HashMap<>();
+    public final Map<Long, Order> cache = new HashMap<>();
 
     public OrderDataMapper() {}
 
@@ -226,7 +224,7 @@ public class OrderDataMapper implements DataMapper<Order> {
 
                     countOrder++;
                 }
-                SimpleLogger.info("[SELECTED] ORDER COUNT: " + countOrder);
+                SimpleLogger.info("[SELECTED] RESTAURANT ORDER COUNT: " + countOrder);
 
             } catch (SQLException e) {
                 SimpleLogger.error("Error while fetching orders by restaurant ID: " + e.getMessage());
@@ -236,7 +234,41 @@ public class OrderDataMapper implements DataMapper<Order> {
             return orders;
     }
 
-        @Override
+    public Set<Order> selectWhereCustomerId(Long customerId) throws SQLException {
+        // TODO make this cache compliant
+
+        String sql = "SELECT * FROM COMMANDE WHERE fk_client = ?";
+
+        Set<Order> orders = new HashSet<>();
+
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+
+            StatementHelper.bindStatementParameters(statement, customerId);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            Integer countOrder = 0;
+            while (resultSet.next()) {
+                Order order = mapToObject(resultSet);
+                orders.add(order);
+
+                cache.put(order.getId(), order);
+
+                countOrder++;
+            }
+            SimpleLogger.info("[SELECTED] CUSTOMER ORDER COUNT: " + countOrder);
+
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while fetching orders by customer ID: " + e.getMessage());
+            throw e;
+        }
+
+        return orders;
+    }
+
+    @Override
     public Order mapToObject(ResultSet resultSet) throws SQLException {
         return new Order.Builder()
                 .withId(resultSet.getLong("numero"))

@@ -16,6 +16,7 @@ import java.util.*;
 
 
 public class CustomerDataMapper implements DataMapper<Customer> {
+    // TODO manage orders
 
     private static final CustomerDataMapper instance = new CustomerDataMapper();
     private final Map<Long, Customer> cache = new HashMap<>();
@@ -35,7 +36,21 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
 
-            setInsertParametersBasedOnType(statement, customer);
+            StatementHelper.bindStatementParameters(
+                    statement,
+                    customer.getEmail(),
+                    customer.getPhone(),
+                    customer instanceof OrganizationCustomer ? ((OrganizationCustomer) customer).getName() : ((PrivateCustomer) customer).getLastName(),
+                    customer.getAddress().getPostalCode(),
+                    customer.getAddress().getLocality(),
+                    customer.getAddress().getStreet(),
+                    customer.getAddress().getStreetNumber() != null ? customer.getAddress().getStreetNumber() : null,
+                    customer.getAddress().getCountryCode(),
+                    customer instanceof OrganizationCustomer ? null : ((PrivateCustomer) customer).getGender(),
+                    customer instanceof OrganizationCustomer ? null : ((PrivateCustomer) customer).getFirstName(),
+                    customer instanceof OrganizationCustomer ? ((OrganizationCustomer) customer).getLegalForm() : null,
+                    customer instanceof OrganizationCustomer ? "O" : "P"
+            );
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
@@ -79,7 +94,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
                     customer.getAddress().getPostalCode(),
                     customer.getAddress().getLocality(),
                     customer.getAddress().getStreet(),
-                    customer.getAddress().getStreetNumber(),
+                    customer.getAddress().getStreetNumber() != null ? customer.getAddress().getStreetNumber() : null,
                     customer.getAddress().getCountryCode(),
                     customer instanceof OrganizationCustomer ? null : ((PrivateCustomer) customer).getGender(),
                     customer instanceof OrganizationCustomer ? null : ((PrivateCustomer) customer).getFirstName(),
@@ -235,50 +250,5 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             throw new SQLException("Unknown customer type: " + type);
         }
     }
-
-    // I don't know if i should do this way, or with the ternary operations...
-    private void setInsertParametersBasedOnType (PreparedStatement statement, Customer customer) {
-
-        if (customer instanceof OrganizationCustomer) {
-            OrganizationCustomer organizationCustomer = (OrganizationCustomer) customer;
-            StatementHelper.bindStatementParameters(
-                    statement,
-                    organizationCustomer.getEmail(),
-                    organizationCustomer.getPhone(),
-                    organizationCustomer.getName(),
-                    organizationCustomer.getAddress().getPostalCode(),
-                    organizationCustomer.getAddress().getLocality(),
-                    organizationCustomer.getAddress().getStreet(),
-                    organizationCustomer.getAddress().getStreetNumber(),
-                    organizationCustomer.getAddress().getCountryCode(),
-                    null, // organizationCustomer has no genre
-                    null, // organizationCustomer has no first name
-                    organizationCustomer.getLegalForm(),
-                    "O" // type organization in database is "O"
-            );
-        }
-
-        if (customer instanceof PrivateCustomer) {
-            PrivateCustomer privateCustomer = (PrivateCustomer) customer;
-            StatementHelper.bindStatementParameters(
-                    statement,
-                    privateCustomer.getEmail(),
-                    privateCustomer.getPhone(),
-                    privateCustomer.getLastName(), // privateCustomer has no name
-                    privateCustomer.getAddress().getPostalCode(),
-                    privateCustomer.getAddress().getLocality(),
-                    privateCustomer.getAddress().getStreet(),
-                    privateCustomer.getAddress().getStreetNumber(),
-                    privateCustomer.getAddress().getCountryCode(),
-                    privateCustomer.getGender(),
-                    privateCustomer.getFirstName(),
-                    null, // privateCustomer has no legal form
-                    "P" // type private in database is "P"
-            );
-        }
-
-    }
-
-
 
 }
