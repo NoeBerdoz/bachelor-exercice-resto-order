@@ -47,11 +47,11 @@ public class RestaurantService {
         return restaurantDataMapper.delete(restaurant);
     }
 
-    public Optional<Restaurant> findRestaurantById(Long id) throws SQLException {
+    public Optional<Restaurant> getRestaurantById(Long id) throws SQLException {
         return restaurantDataMapper.selectById(id);
     }
 
-    public List<Restaurant> findAllRestaurants() throws SQLException {
+    public List<Restaurant> getAllRestaurants() throws SQLException {
         return restaurantDataMapper.selectAll();
     }
 
