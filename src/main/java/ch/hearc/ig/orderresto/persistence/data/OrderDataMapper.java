@@ -13,6 +13,8 @@ import java.util.*;
 
 public class OrderDataMapper implements DataMapper<Order> {
 
+    // TODO add the logic with PRODUIT_COMMANDE associative table
+
     private static final OrderDataMapper instance = new OrderDataMapper();
     private final Map<Long, Order> cache = new HashMap<>();
 
@@ -23,7 +25,7 @@ public class OrderDataMapper implements DataMapper<Order> {
     }
 
     @Override
-    public boolean insert(Order order) {
+    public boolean insert(Order order) throws SQLException {
 
         String sql = "INSERT INTO COMMANDE (fk_client, fk_resto, a_emporter, quand) VALUES (?, ?, ?, ?)";
 
@@ -40,7 +42,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             );
 
             int affectedRows = statement.executeUpdate();
-            if (affectedRows < 0) {
+            if (affectedRows > 0) {
 
                 // Set the new generated ID to the order object
                 ResultSet generatedKeys = statement.getGeneratedKeys();
@@ -57,6 +59,7 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while inserting order: " + e.getMessage());
+            throw e;
         }
 
         return false;
@@ -64,7 +67,6 @@ public class OrderDataMapper implements DataMapper<Order> {
 
     @Override
     public boolean update(Order order) throws SQLException {
-
         String sql = "UPDATE COMMANDE SET fk_client = ?, fk_resto = ?, a_emporter = ?, quand = ? WHERE numero = ?";
 
         try {
@@ -100,7 +102,7 @@ public class OrderDataMapper implements DataMapper<Order> {
     }
 
     @Override
-    public boolean delete(Order order) {
+    public boolean delete(Order order) throws SQLException {
 
         String sql = "DELETE FROM COMMANDE WHERE numero = ?";
 
@@ -126,16 +128,18 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while deleting order: " + e.getMessage());
+            throw e;
         }
 
         return false;
     }
 
     @Override
-    public Optional<Order> selectById(Long id) {
+    public Optional<Order> selectById(Long id) throws SQLException {
 
         // Check the cache first
         if (cache.containsKey(id)) {
+            SimpleLogger.info("[CACHE] Selected ORDER with ID: " + id);
             return Optional.of(cache.get(id));
         }
 
@@ -155,18 +159,20 @@ public class OrderDataMapper implements DataMapper<Order> {
 
                 cache.put(order.getId(), order);
 
+                SimpleLogger.info("[SELECTED] ORDER with ID: " + id);
                 return Optional.of(order);
             }
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching order by ID: " + e.getMessage());
+            throw e;
         }
 
         return Optional.empty();
     }
 
     @Override
-    public List<Order> selectAll() {
+    public List<Order> selectAll() throws SQLException {
 
         String sql = "SELECT * FROM COMMANDE";
 
@@ -190,6 +196,7 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching all orders: " + e.getMessage());
+            throw e;
         }
 
         return orders;
@@ -197,14 +204,20 @@ public class OrderDataMapper implements DataMapper<Order> {
 
     @Override
     public Order mapToObject(ResultSet resultSet) throws SQLException {
-        // TODO WORK IN PROGRESS HERE
         return new Order.Builder()
                 .withId(resultSet.getLong("numero"))
-                .withCustomer(CustomerDataMapper.getInstance().selectById(resultSet.getLong("fk_client")).orElse(null))
-                .withRestaurant(RestaurantDataMapper.getInstance().selectById(resultSet.getLong("fk_resto")).orElse(null))
+                .withCustomer(
+                        CustomerDataMapper.getInstance()
+                                .selectById(resultSet.getLong("FK_CLIENT"))
+                                .orElseThrow(() -> new IllegalArgumentException("Given FK_CLIENT not found in database"))
+                )
+                .withRestaurant(
+                        RestaurantDataMapper.getInstance()
+                                .selectById(resultSet.getLong("FK_RESTO"))
+                                .orElseThrow(() -> new IllegalArgumentException("Given FK_RESTO not found in database"))
+                )
                 .withTakeAway(resultSet.getBoolean("a_emporter"))
                 .withWhen(resultSet.getTimestamp("quand").toLocalDateTime())
                 .build();
     }
-
 }

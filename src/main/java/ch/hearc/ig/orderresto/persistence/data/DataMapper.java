@@ -10,9 +10,9 @@ public interface DataMapper<T> {
 
     boolean update(T entity) throws SQLException;
 
-    boolean delete(T entity);
+    boolean delete(T entity) throws SQLException;
 
-    Optional<T> selectById(Long id);
+    Optional<T> selectById(Long id) throws SQLException;
 
     List<T> selectAll() throws SQLException;
 

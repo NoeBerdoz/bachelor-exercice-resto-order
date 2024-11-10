@@ -21,7 +21,7 @@ public class DatabaseConnection {
         if (connection == null) {
             try {
                 connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                SimpleLogger.info("Connection established!");
+                SimpleLogger.warning("[+] CONNECTION OPENED");
             } catch (Exception e) {
                 SimpleLogger.error("Failed to connect to database");
                 throw new RuntimeException("Failed to connect to database", e);
@@ -35,6 +35,7 @@ public class DatabaseConnection {
             try {
                 connection.close();
                 connection = null;
+                SimpleLogger.warning("[-] CONNECTION CLOSED");
             } catch (Exception e) {
                 throw new RuntimeException("Failed to close database connection", e);
             }

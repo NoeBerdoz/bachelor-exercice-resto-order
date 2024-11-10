@@ -24,7 +24,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     // Insert a Restaurant to the database.
     @Override
-    public boolean insert(Restaurant restaurant) {
+    public boolean insert(Restaurant restaurant) throws SQLException {
 
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -60,6 +60,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while inserting restaurant: " + e.getMessage());
+            throw e;
         }
 
         return false;
@@ -106,7 +107,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     // Delete a Restaurant in the database based on its id
     @Override
-    public boolean delete(Restaurant restaurant) {
+    public boolean delete(Restaurant restaurant) throws SQLException {
         String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
 
         try {
@@ -131,6 +132,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while deleting restaurant: " + e.getMessage());
+            throw e;
         }
 
         return false;
@@ -138,10 +140,11 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     // Retrieve a Restaurant by its ID.
     @Override
-    public Optional<Restaurant> selectById(Long id) {
+    public Optional<Restaurant> selectById(Long id) throws SQLException {
 
         // Check the cache first
         if (cache.containsKey(id)) {
+            SimpleLogger.info("[CACHE] Selected RESTAURANT with ID: " + id);
             return Optional.of(cache.get(id));
         }
 
@@ -160,11 +163,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
                 cache.put(restaurant.getId(), restaurant);
 
+                SimpleLogger.info("[SELECTED] RESTAURANT with ID: " + id);
                 return Optional.of(restaurant);
             }
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching restaurant by ID: " + e.getMessage());
+            throw e;
         }
 
         return Optional.empty();
@@ -173,7 +178,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     // Retrieves all restaurants from the database.
     @Override
-    public List<Restaurant> selectAll() {
+    public List<Restaurant> selectAll() throws SQLException {
 
         String sql = "SELECT * FROM RESTAURANT";
 
@@ -196,6 +201,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());
+            throw e;
         }
 
         return restaurants;

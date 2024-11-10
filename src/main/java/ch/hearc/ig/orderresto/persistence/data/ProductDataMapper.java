@@ -24,7 +24,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
     // Insert a Product to the database.
     @Override
-    public boolean insert(Product product) {
+    public boolean insert(Product product) throws SQLException {
 
         String sql = "INSERT INTO PRODUIT (FK_RESTO, PRIX_UNITAIRE, NOM, DESCRIPTION) VALUES (?, ?, ?, ?)";
 
@@ -58,6 +58,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while inserting product: " + e.getMessage());
+            throw e;
         }
 
         return false;
@@ -102,7 +103,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
     // Delete a Product in the database based on its id
     @Override
-    public boolean delete(Product product) {
+    public boolean delete(Product product) throws SQLException {
         String sql = "DELETE FROM PRODUIT WHERE NUMERO = ?";
 
         try {
@@ -124,6 +125,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while deleting product: " + e.getMessage());
+            throw e;
         }
 
         return false;
@@ -131,10 +133,11 @@ public class ProductDataMapper implements DataMapper<Product> {
 
     // Retrieve a Product by its ID.
     @Override
-    public Optional<Product> selectById(Long id) {
+    public Optional<Product> selectById(Long id) throws SQLException {
 
         // Check the cache first
         if (cache.containsKey(id)) {
+            SimpleLogger.info("[CACHE] Selected PRODUCT with ID: " + id);
             return Optional.of(cache.get(id));
         }
 
@@ -153,11 +156,13 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                 cache.put(product.getId(), product);
 
+                SimpleLogger.info("[SELECTED] PRODUCT with ID: " + id);
                 return Optional.of(product);
             }
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching product by ID: " + e.getMessage());
+            throw e;
         }
 
         return Optional.empty();
@@ -166,7 +171,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
     // Retrieves all Products from the database.
     @Override
-    public List<Product> selectAll() {
+    public List<Product> selectAll() throws SQLException {
 
         String sql = "SELECT * FROM PRODUIT";
 
@@ -190,6 +195,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             SimpleLogger.info("[SELECTED] PRODUCT COUNT: " + countProduct);
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching products: " + e.getMessage());
+            throw e;
         }
 
         return products;
