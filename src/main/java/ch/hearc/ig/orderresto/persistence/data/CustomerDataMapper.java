@@ -1,5 +1,6 @@
 package ch.hearc.ig.orderresto.persistence.data;
 
+import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.OrganizationCustomer;
 import ch.hearc.ig.orderresto.business.PrivateCustomer;
@@ -14,7 +15,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 
-public class CustomerDataMapper implements DataMapper {
+public class CustomerDataMapper implements DataMapper<Customer> {
 
     private static final CustomerDataMapper instance = new CustomerDataMapper();
     private final Map<Long, Customer> cache = new HashMap<>();
@@ -26,7 +27,7 @@ public class CustomerDataMapper implements DataMapper {
     }
 
     @Override
-    public boolean insert(Customer customer) {
+    public boolean insert(Customer customer) throws SQLException {
 
         String sql = "INSERT INTO CLIENT (email, telephone, nom, code_postal, localite, rue, num_rue, pays, est_une_femme, prenom, forme_sociale, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -54,6 +55,7 @@ public class CustomerDataMapper implements DataMapper {
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while inserting customer: " + e.getMessage());
+            throw e;
         }
 
         return false;
@@ -104,6 +106,135 @@ public class CustomerDataMapper implements DataMapper {
         return false;
     }
 
+    @Override
+    public boolean delete(Customer customer) throws SQLException {
+        String sql = "DELETE FROM CLIENT WHERE NUMERO = ?";
+
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+
+            StatementHelper.bindStatementParameters(
+                    statement,
+                    customer.getId()
+            );
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                SimpleLogger.info("[DELETED] CUSTOMER WITH ID: " + customer.getId());
+
+                cache.remove(customer.getId());
+
+                return true;
+            } else {
+                SimpleLogger.warning("[DELETED] NO CUSTOMER TO DELETE WITH ID: " + customer.getId());
+            }
+
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while deleting customer: " + e.getMessage());
+            throw e;
+        }
+
+        return false;
+    }
+
+    @Override
+    public Optional<Customer> selectById(Long id) throws SQLException {
+
+        if (cache.containsKey(id)) {
+            SimpleLogger.info("[CACHE] Selected CUSTOMER with ID: " + id);
+            return Optional.of(cache.get(id));
+        }
+
+        String sql = "SELECT * FROM CLIENT WHERE NUMERO = ?";
+
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            StatementHelper.bindStatementParameters(statement, id);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+
+                Customer customer = mapToObject(resultSet);
+
+                cache.put(customer.getId(), customer);
+
+                SimpleLogger.info("[SELECTED] CUSTOMER with ID: " + id);
+                return Optional.of(customer);
+            }
+
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while fetching customer by ID: " + e.getMessage());
+            throw e;
+        }
+
+        return Optional.empty();
+    }
+
+    @Override public List<Customer> selectAll() throws SQLException {
+
+        String sql = "SELECT * FROM CLIENT";
+
+        List<Customer> customers = new ArrayList<>();
+
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+
+            Integer countCustomer = 0;
+            while (resultSet.next()) {
+                Customer customer = mapToObject(resultSet);
+                customers.add(customer);
+
+                cache.put(customer.getId(), customer);
+
+                countCustomer++;
+            }
+            SimpleLogger.info("[SELECTED] CLIENT COUNT: " + countCustomer);
+
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while fetching all customers: " + e.getMessage());
+            throw e;
+        }
+
+        return customers;
+    }
+
+    @Override
+    public Customer mapToObject(ResultSet resultSet) throws SQLException {
+
+        Address address = new Address(
+                resultSet.getString("pays"),
+                resultSet.getString("code_postal"),
+                resultSet.getString("localite"),
+                resultSet.getString("rue"),
+                resultSet.getString("num_rue")
+        );
+
+        Long id = resultSet.getLong("numero");
+        String email = resultSet.getString("email");
+        String phone = resultSet.getString("telephone");
+        String name = resultSet.getString("nom");
+        String gender = resultSet.getString("est_une_femme");
+        String firstName = resultSet.getString("prenom");
+        String legalForm = resultSet.getString("forme_sociale");
+        String type = resultSet.getString("type");
+
+        // type "O" in database defines an organization customer
+        if ("O".equals(type)) {
+            return new OrganizationCustomer(id, phone, email, address, name, legalForm);
+        }
+        // type "P" in database defines a private customer
+        else if ("P".equals(type)) {
+            return new PrivateCustomer(id, phone, email, address, gender, firstName, name);
+        }
+        else {
+            throw new SQLException("Unknown customer type: " + type);
+        }
+    }
 
     // I don't know if i should do this way, or with the ternary operations...
     private void setInsertParametersBasedOnType (PreparedStatement statement, Customer customer) {
@@ -141,7 +272,8 @@ public class CustomerDataMapper implements DataMapper {
                     privateCustomer.getAddress().getCountryCode(),
                     privateCustomer.getGender(),
                     privateCustomer.getFirstName(),
-                    null // privateCustomer has no legal form
+                    null, // privateCustomer has no legal form
+                    "P" // type private in database is "P"
             );
         }
 

@@ -1,8 +1,8 @@
 package ch.hearc.ig.orderresto.application;
 
-import ch.hearc.ig.orderresto.business.Address;
-import ch.hearc.ig.orderresto.business.Product;
-import ch.hearc.ig.orderresto.business.Restaurant;
+import ch.hearc.ig.orderresto.business.*;
+import ch.hearc.ig.orderresto.persistence.data.CustomerDataMapper;
+import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
 import ch.hearc.ig.orderresto.persistence.data.ProductDataMapper;
 import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
@@ -12,6 +12,7 @@ import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ public class Main {
 
         RestaurantDataMapper restaurantDataMapper = new RestaurantDataMapper();
         ProductDataMapper productDataMapper = new ProductDataMapper();
+        CustomerDataMapper customerDataMapper = new CustomerDataMapper();
+        OrderDataMapper orderDataMapper = new OrderDataMapper();
 
         Optional<Restaurant> restaurantFound = restaurantDataMapper.selectById(2L);
 
@@ -101,12 +104,66 @@ public class Main {
 
         productDataMapper.delete(productToInsert3);
 
-        Product productFound = productDataMapper.selectById(21L).orElseThrow();
+        Product productFound = productDataMapper.selectById(1L).orElseThrow();
 
         SimpleLogger.info("Product found: " + productFound.getName());
 
+        PrivateCustomer privateCustomer = new PrivateCustomer(null, "+41 76 000 00 00", "testPrivate@bachelor.com", addressToInsert, "O", "testPrivateFirstName", "testPrivateName");
+        PrivateCustomer privateCustomerToDelete = new PrivateCustomer(null, "+41 76 000 00 00", "delete@me.com", addressToInsert, "N", "delete", "me");
+        OrganizationCustomer organizationCustomer = new OrganizationCustomer(null, "+41 32 000 00 00", "testOrganization@corp.com", addressToInsert, "EVIL CORP", "SA");
+
+
+        customerDataMapper.insert(privateCustomer);
+        customerDataMapper.insert(privateCustomerToDelete);
+        customerDataMapper.insert(organizationCustomer);
+
+        organizationCustomer.setEmail("evil@corp.com");
+        customerDataMapper.update(organizationCustomer);
+        customerDataMapper.delete(privateCustomerToDelete);
+
+        Optional<Customer> customerFound = customerDataMapper.selectById(organizationCustomer.getId());
+
+        List<Customer> allCustomers = customerDataMapper.selectAll();
+
+        Order order1 = new Order.Builder()
+                .withId(null)
+                .withCustomer(privateCustomer)
+                .withRestaurant(restaurantThatHasProduct)
+                .withTakeAway(false)
+                .withWhen(LocalDateTime.now())
+                .build();
+
+
+        Order order2 = new Order.Builder()
+                .withId(null)
+                .withCustomer(organizationCustomer)
+                .withRestaurant(restaurantThatHasProduct)
+                .withTakeAway(false)
+                .withWhen(LocalDateTime.now())
+                .build();
+
+        Order order3 = new Order.Builder()
+                .withId(null)
+                .withCustomer(organizationCustomer)
+                .withRestaurant(restaurantThatHasProduct)
+                .withTakeAway(false)
+                .withWhen(LocalDateTime.of(2000, 1, 1, 0, 0))
+                .build();
+
+        orderDataMapper.insert(order1);
+        orderDataMapper.insert(order2);
+        orderDataMapper.insert(order3);
+
+        order2.setWhen(LocalDateTime.of(1990, 1, 1, 0, 0));
+        orderDataMapper.update(order2);
+
+        orderDataMapper.delete(order3);
+
+        Optional<Order> orderFound = orderDataMapper.selectById(order2.getId());
+        List<Order> allOrders = orderDataMapper.selectAll();
+
         DatabaseConnection.closeConnection();
 
-        (new MainCLI()).run();
+        // (new MainCLI()).run();
     }
 }
