@@ -49,7 +49,6 @@ public class Order {
         return when;
     }
 
-    // TODO this total amount is not properly calculated in my project
     public BigDecimal getTotalAmount() {
         return totalAmount;
     }

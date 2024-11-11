@@ -234,8 +234,8 @@ public class OrderDataMapper implements DataMapper<Order> {
             return orders;
     }
 
+    // TODO make this cache compliant
     public Set<Order> selectWhereCustomerId(Long customerId) throws SQLException {
-        // TODO make this cache compliant
 
         String sql = "SELECT * FROM COMMANDE WHERE fk_client = ?";
 

@@ -92,7 +92,6 @@ public class Product {
         private BigDecimal unitPrice;
         private String description;
         private Restaurant restaurant;
-        // TODO add Order logic
 
         public Builder withId(Long id) {
             this.id = id;
