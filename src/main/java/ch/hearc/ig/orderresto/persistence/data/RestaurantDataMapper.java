@@ -5,6 +5,7 @@ import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.persistence.filter.Condition;
 import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.persistence.helper.CacheProvider;
 import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
@@ -14,7 +15,8 @@ import java.util.*;
 public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     private static final RestaurantDataMapper instance = new RestaurantDataMapper();
-    private final Map<Long, Restaurant> cache = new HashMap<>();
+
+    private final CacheProvider<Long, Restaurant> cacheProvider = new CacheProvider<>();
 
     public RestaurantDataMapper() {}
 
@@ -52,7 +54,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                     restaurant.setId(Long.valueOf(generatedId));
                     SimpleLogger.info("[INSERTED] RESTAURANT WITH ID: " + restaurant.getId());
 
-                    cache.put(restaurant.getId(), restaurant);
+                    cacheProvider.cache.put(restaurant.getId(), restaurant);
 
                     return true;
                 }
@@ -91,7 +93,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[UPDATED] RESTAURANT WITH ID: " + restaurant.getId());
 
-                cache.put(restaurant.getId(), restaurant);
+                cacheProvider.cache.put(restaurant.getId(), restaurant);
 
                 return true;
             } else {
@@ -123,7 +125,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[DELETED] RESTAURANT WITH ID: " + restaurant.getId());
 
-                cache.remove(restaurant.getId());
+                cacheProvider.cache.remove(restaurant.getId());
 
                 return true;
             } else {
@@ -143,9 +145,9 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     public Optional<Restaurant> selectById(Long id) throws SQLException {
 
         // Check the cache first
-        if (cache.containsKey(id)) {
+        if (cacheProvider.cache.containsKey(id)) {
             SimpleLogger.info("[CACHE] Selected RESTAURANT with ID: " + id);
-            return Optional.of(cache.get(id));
+            return Optional.of(cacheProvider.cache.get(id));
         }
 
         String sql = "SELECT * FROM RESTAURANT WHERE numero = ?";
@@ -161,7 +163,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             if (resultSet.next()) {
                 Restaurant restaurant = mapToObject(resultSet);
 
-                cache.put(restaurant.getId(), restaurant);
+                cacheProvider.cache.put(restaurant.getId(), restaurant);
 
                 SimpleLogger.info("[SELECTED] RESTAURANT with ID: " + id);
                 return Optional.of(restaurant);
@@ -180,6 +182,12 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     @Override
     public List<Restaurant> selectAll() throws SQLException {
 
+        // Check the cache first
+        if (cacheProvider.isCacheValid()){
+            SimpleLogger.info("[CACHE] Selected all RESTAURANT" );
+            return new ArrayList<>(cacheProvider.cache.values());
+        }
+
         String sql = "SELECT * FROM RESTAURANT";
 
         List<Restaurant> restaurants = new ArrayList<>();
@@ -194,10 +202,14 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 Restaurant restaurant = mapToObject(resultSet);
                 restaurants.add(restaurant);
 
-                cache.put(restaurant.getId(), restaurant);
+                cacheProvider.cache.put(restaurant.getId(), restaurant);
 
                 countRestaurant++;
             }
+
+            // set cache valid, we want to fetch the all data only once
+            cacheProvider.setCacheValid();
+
             SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());

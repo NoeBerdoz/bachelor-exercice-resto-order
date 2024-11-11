@@ -2,8 +2,11 @@ package ch.hearc.ig.orderresto.persistence.data;
 
 import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.business.Product;
-import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;import ch.hearc.ig.orderresto.utils.SimpleLogger;
+import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.persistence.helper.CacheProvider;
+import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
+import java.math.BigDecimal;
 import java.sql.Connection;import java.sql.PreparedStatement;import java.sql.ResultSet;import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,14 +26,15 @@ import java.util.Set;public class ProductOrderMapper {
 
     // store each product id made for an order id
     // not properly implemented as it is a many to many relation
-    public final Map<Long, Set<Long>> cache = new HashMap<>();
+    public final CacheProvider<Long, Set<Product>> cacheProvider = new CacheProvider<>();
 
-    // Doesn't support the cache as it would need to complexify the cache logic
+    // TODO add cache logic (or maybe delete this method and its service method user)
+    // Currently doesn't support the cache as it would need to complexify the cache logic
     public Set<Order> selectOrdersWhereProductId(Long productId) throws SQLException {
 
         String sql = "SELECT * FROM COMMANDE " +
-                "JOIN PRODUIT_COMMANDE ON COMMANDE.NUMERO = PRODUIT_COMMANDE.FK_COMMANDE " +
-                "WHERE PRODUIT_COMMANDE.FK_PRODUIT = ?";
+                     "JOIN PRODUIT_COMMANDE ON COMMANDE.NUMERO = PRODUIT_COMMANDE.FK_COMMANDE " +
+                     "WHERE PRODUIT_COMMANDE.FK_PRODUIT = ?";
 
         Set<Order> orders = new HashSet<>();
 
@@ -47,7 +51,7 @@ import java.util.Set;public class ProductOrderMapper {
                 Order order = OrderDataMapper.getInstance().mapToObject(resultSet);
                 orders.add(order);
 
-                OrderDataMapper.getInstance().cache.put(order.getId(), order);
+                OrderDataMapper.getInstance().cacheProvider.cache.put(order.getId(), order);
 
                 countOrdersFromProduct++;
             }
@@ -61,23 +65,27 @@ import java.util.Set;public class ProductOrderMapper {
         return orders;
     }
 
-    // this method doesn't handle the cache as it would need to complexify the cache logic
-    public Set<Product> selectProductsWhereOrderId(Long orderId) throws SQLException {
+    // TODO write java doc
+    public Set<Product> selectProductsWhereOrder(Order order) throws SQLException {
+
+        // Check the cache first
+        if (cacheProvider.isCacheValid() && cacheProvider.cache.containsKey(order.getId())) {
+            return cacheProvider.cache.get(order.getId());
+        }
 
         String sql = "SELECT * FROM PRODUIT " +
-                "JOIN PRODUIT_COMMANDE ON PRODUIT.NUMERO = PRODUIT_COMMANDE.FK_PRODUIT " +
-                "WHERE PRODUIT_COMMANDE.FK_COMMANDE = ?";
+                     "JOIN PRODUIT_COMMANDE ON PRODUIT.NUMERO = PRODUIT_COMMANDE.FK_PRODUIT " +
+                     "WHERE PRODUIT_COMMANDE.FK_COMMANDE = ?";
 
-        cache.put(orderId, new HashSet<>());
+        cacheProvider.cache.put(order.getId(), new HashSet<>());
 
         Set<Product> products = new HashSet<>();
-
 
         try {
             Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            StatementHelper.bindStatementParameters(statement, orderId);
+            StatementHelper.bindStatementParameters(statement, order.getId());
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -86,10 +94,22 @@ import java.util.Set;public class ProductOrderMapper {
                 Product product = ProductDataMapper.getInstance().mapToObject(resultSet);
                 products.add(product);
 
-                ProductDataMapper.getInstance().cache.put(product.getId(), product);
-                cache.get(orderId).add(product.getId());
+                // Update Product cache
+                ProductDataMapper.getInstance().cacheProvider.cache.put(product.getId(), product);
+                cacheProvider.cache.get(order.getId()).add(product);
                 countProductsInOrder++;
             }
+
+            // Update Order according to the freshly fetched products
+            order.setProducts(products);
+
+            // Set the total amount of the order
+            BigDecimal orderTotalPrice = new BigDecimal(0);
+            for (Product product : products) {
+                orderTotalPrice = orderTotalPrice.add(product.getUnitPrice());
+            }
+            order.setTotalAmount(orderTotalPrice);
+            OrderDataMapper.getInstance().cacheProvider.cache.put(order.getId(), order);
 
             SimpleLogger.info("[SELECTED] ORDER COUNT: " + countProductsInOrder);
         } catch (SQLException e) {
@@ -101,7 +121,7 @@ import java.util.Set;public class ProductOrderMapper {
     }
 
     // this method doesn't handle the cache as it would need to complexify the cache logic
-    public boolean insertProductOrderRelation(Long productId, Long orderId) throws SQLException {
+    public boolean insertProductOrderRelation(Product product, Order order) throws SQLException {
 
         String sql = "INSERT INTO PRODUIT_COMMANDE (FK_PRODUIT, FK_COMMANDE) VALUES (?,?)";
 
@@ -111,17 +131,18 @@ import java.util.Set;public class ProductOrderMapper {
 
             StatementHelper.bindStatementParameters(
                     statement,
-                    productId,
-                    orderId
+                    product.getId(),
+                    order.getId()
             );
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
 
                 // Add productId to the set associated with orderId, creating a new set if necessary
-                cache.computeIfAbsent(orderId, k -> new HashSet<>()).add(productId);
+                cacheProvider.cache.computeIfAbsent(order.getId(), k -> new HashSet<>()).add(product);
+                // TODO i think i need to cache also the product and order from their cacheProvider here
 
-                SimpleLogger.info("[INSERTED] PRODUCT ORDER RELATION with PRODUCT ID: " + productId + " and ORDER ID: " + orderId);
+                SimpleLogger.info("[INSERTED] PRODUCT ORDER RELATION with PRODUCT ID: " + product.getId() + " and ORDER ID: " + product.getId());
             }
 
             return true;
@@ -145,7 +166,7 @@ import java.util.Set;public class ProductOrderMapper {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                cache.remove(orderId);
+                cacheProvider.cache.remove(orderId);
                 SimpleLogger.info("[DELETED] PRODUCT ORDER RELATION with ORDER ID: " + orderId);
                 return true;
             } else {

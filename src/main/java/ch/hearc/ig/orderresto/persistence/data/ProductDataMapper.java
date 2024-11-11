@@ -2,6 +2,7 @@ package ch.hearc.ig.orderresto.persistence.data;
 
 import ch.hearc.ig.orderresto.business.Product;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.persistence.helper.CacheProvider;
 import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
@@ -14,7 +15,8 @@ import java.util.*;
 public class ProductDataMapper implements DataMapper<Product> {
 
     private static final ProductDataMapper instance = new ProductDataMapper();
-    public final Map<Long, Product> cache = new HashMap<>();
+
+    public final CacheProvider<Long, Product> cacheProvider = new CacheProvider<>();
 
     public ProductDataMapper() {}
 
@@ -50,7 +52,7 @@ public class ProductDataMapper implements DataMapper<Product> {
                     product.setId(Long.valueOf(generatedId));
                     SimpleLogger.info("[INSERTED] PRODUCT WITH ID: " + product.getId());
 
-                    cache.put(product.getId(), product);
+                    cacheProvider.cache.put(product.getId(), product);
 
                     return true;
                 }
@@ -87,7 +89,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[UPDATED] PRODUCT WITH ID: " + product.getId());
 
-                cache.put(product.getId(), product);
+                cacheProvider.cache.put(product.getId(), product);
 
                 return true;
             } else {
@@ -116,7 +118,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[DELETED] PRODUCT WITH ID: " + product.getId());
 
-                cache.remove(product.getId());
+                cacheProvider.cache.remove(product.getId());
 
                 return true;
             } else {
@@ -136,9 +138,9 @@ public class ProductDataMapper implements DataMapper<Product> {
     public Optional<Product> selectById(Long id) throws SQLException {
 
         // Check the cache first
-        if (cache.containsKey(id)) {
+        if (cacheProvider.cache.containsKey(id)) {
             SimpleLogger.info("[CACHE] Selected PRODUCT with ID: " + id);
-            return Optional.of(cache.get(id));
+            return Optional.of(cacheProvider.cache.get(id));
         }
 
         String sql = "SELECT * FROM PRODUIT WHERE numero = ?";
@@ -154,7 +156,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             if (resultSet.next()) {
                 Product product = mapToObject(resultSet);
 
-                cache.put(product.getId(), product);
+                cacheProvider.cache.put(product.getId(), product);
 
                 SimpleLogger.info("[SELECTED] PRODUCT with ID: " + id);
                 return Optional.of(product);
@@ -173,6 +175,12 @@ public class ProductDataMapper implements DataMapper<Product> {
     @Override
     public List<Product> selectAll() throws SQLException {
 
+        // Check the cache first
+        if (cacheProvider.isCacheValid()){
+            SimpleLogger.info("[CACHE] Selected all PRODUCT" );
+            return new ArrayList<>(cacheProvider.cache.values());
+        }
+
         String sql = "SELECT * FROM PRODUIT";
 
         List<Product> products = new ArrayList<>();
@@ -188,10 +196,13 @@ public class ProductDataMapper implements DataMapper<Product> {
                 Product product = mapToObject(resultSet);
                 products.add(product);
 
-                cache.put(product.getId(), product);
+                cacheProvider.cache.put(product.getId(), product);
 
                 countProduct++;
             }
+
+            cacheProvider.setCacheValid();
+
             SimpleLogger.info("[SELECTED] PRODUCT COUNT: " + countProduct);
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching products: " + e.getMessage());
@@ -220,7 +231,7 @@ public class ProductDataMapper implements DataMapper<Product> {
                 Product product = mapToObject(resultSet);
                 products.add(product);
 
-                cache.put(product.getId(), product);
+                cacheProvider.cache.put(product.getId(), product);
 
                 countProduct++;
             }

@@ -27,8 +27,6 @@ public class ProductOrderService {
     private final ProductDataMapper productDataMapper = ProductDataMapper.getInstance();
     private final ProductOrderMapper productOrderMapper = ProductOrderMapper.getInstance();
 
-
-
     public Set<Order> getOrdersFromProduct(Product product) {
         Set <Order> orders = null;
 
@@ -49,15 +47,7 @@ public class ProductOrderService {
 
         try {
             // Set products of the order
-            products = productOrderMapper.selectProductsWhereOrderId(order.getId());
-            order.setProducts(products);
-
-            // Set the total amount of the order
-            BigDecimal orderTotalPrice = new BigDecimal(0);
-            for (Product product : products) {
-                orderTotalPrice = orderTotalPrice.add(product.getUnitPrice());
-            }
-            order.setTotalAmount(orderTotalPrice);
+            products = productOrderMapper.selectProductsWhereOrder(order);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -71,7 +61,7 @@ public class ProductOrderService {
         try {
             orderDataMapper.insert(order);
             for (Product product : order.getProducts()) {
-                productOrderMapper.insertProductOrderRelation(product.getId(), order.getId());
+                productOrderMapper.insertProductOrderRelation(product, order);
             }
             return true;
         } catch (SQLException e) {

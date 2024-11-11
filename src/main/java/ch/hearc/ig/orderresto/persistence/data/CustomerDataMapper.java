@@ -5,6 +5,7 @@ import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.OrganizationCustomer;
 import ch.hearc.ig.orderresto.business.PrivateCustomer;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.persistence.helper.CacheProvider;
 import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
@@ -18,7 +19,8 @@ import java.util.*;
 public class CustomerDataMapper implements DataMapper<Customer> {
 
     private static final CustomerDataMapper instance = new CustomerDataMapper();
-    private final Map<Long, Customer> cache = new HashMap<>();
+
+    private final CacheProvider<Long, Customer> cacheProvider = new CacheProvider<>();
 
     public CustomerDataMapper() {}
 
@@ -61,7 +63,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
                     customer.setId(Long.valueOf(generatedId));
                     SimpleLogger.info("[INSERTED] CUSTOMER WITH ID: " + customer.getId());
 
-                    cache.put(customer.getId(), customer);
+                    cacheProvider.cache.put(customer.getId(), customer);
 
                     return true;
                 }
@@ -106,7 +108,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[UPDATED] CUSTOMER WITH ID: " + customer.getId());
 
-                cache.put(customer.getId(), customer);
+                cacheProvider.cache.put(customer.getId(), customer);
 
                 return true;
             } else {
@@ -137,7 +139,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[DELETED] CUSTOMER WITH ID: " + customer.getId());
 
-                cache.remove(customer.getId());
+                cacheProvider.cache.remove(customer.getId());
 
                 return true;
             } else {
@@ -155,9 +157,9 @@ public class CustomerDataMapper implements DataMapper<Customer> {
     @Override
     public Optional<Customer> selectById(Long id) throws SQLException {
 
-        if (cache.containsKey(id)) {
+        if (cacheProvider.cache.containsKey(id)) {
             SimpleLogger.info("[CACHE] Selected CUSTOMER with ID: " + id);
-            return Optional.of(cache.get(id));
+            return Optional.of(cacheProvider.cache.get(id));
         }
 
         String sql = "SELECT * FROM CLIENT WHERE NUMERO = ?";
@@ -173,7 +175,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
                 Customer customer = mapToObject(resultSet);
 
-                cache.put(customer.getId(), customer);
+                cacheProvider.cache.put(customer.getId(), customer);
 
                 SimpleLogger.info("[SELECTED] CUSTOMER with ID: " + id);
                 return Optional.of(customer);
@@ -191,6 +193,12 @@ public class CustomerDataMapper implements DataMapper<Customer> {
     @Override
     public List<Customer> selectAll() throws SQLException {
 
+        // Check the cache first
+        if (cacheProvider.isCacheValid()){
+            SimpleLogger.info("[CACHE] Selected all CUSTOMER" );
+            return new ArrayList<>(cacheProvider.cache.values());
+        }
+
         String sql = "SELECT * FROM CLIENT";
 
         List<Customer> customers = new ArrayList<>();
@@ -205,10 +213,13 @@ public class CustomerDataMapper implements DataMapper<Customer> {
                 Customer customer = mapToObject(resultSet);
                 customers.add(customer);
 
-                cache.put(customer.getId(), customer);
+                cacheProvider.cache.put(customer.getId(), customer);
 
                 countCustomer++;
             }
+
+            cacheProvider.setCacheValid();
+
             SimpleLogger.info("[SELECTED] CLIENT COUNT: " + countCustomer);
 
         } catch (SQLException e) {

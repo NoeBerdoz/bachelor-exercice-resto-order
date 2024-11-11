@@ -2,6 +2,7 @@ package ch.hearc.ig.orderresto.persistence.data;
 
 import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
+import ch.hearc.ig.orderresto.persistence.helper.CacheProvider;
 import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
@@ -14,7 +15,8 @@ import java.util.*;
 public class OrderDataMapper implements DataMapper<Order> {
 
     private static final OrderDataMapper instance = new OrderDataMapper();
-    public final Map<Long, Order> cache = new HashMap<>();
+
+    public final CacheProvider<Long, Order> cacheProvider = new CacheProvider<>();
 
     public OrderDataMapper() {}
 
@@ -49,7 +51,7 @@ public class OrderDataMapper implements DataMapper<Order> {
                     order.setId(Long.valueOf(generatedId));
                     SimpleLogger.info("[INSERTED] ORDER WITH ID: " + order.getId());
 
-                    cache.put(order.getId(), order);
+                    cacheProvider.cache.put(order.getId(), order);
 
                     return true;
                 }
@@ -84,7 +86,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[UPDATED] ORDER WITH ID: " + order.getId());
 
-                cache.put(order.getId(), order);
+                cacheProvider.cache.put(order.getId(), order);
 
                 return true;
             } else {
@@ -117,7 +119,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             if (affectedRows > 0) {
                 SimpleLogger.info("[DELETED] ORDER WITH ID: " + order.getId());
 
-                cache.remove(order.getId());
+                cacheProvider.cache.remove(order.getId());
 
                 return true;
             } else {
@@ -136,9 +138,9 @@ public class OrderDataMapper implements DataMapper<Order> {
     public Optional<Order> selectById(Long id) throws SQLException {
 
         // Check the cache first
-        if (cache.containsKey(id)) {
+        if (cacheProvider.cache.containsKey(id)) {
             SimpleLogger.info("[CACHE] Selected ORDER with ID: " + id);
-            return Optional.of(cache.get(id));
+            return Optional.of(cacheProvider.cache.get(id));
         }
 
         String sql = "SELECT * FROM COMMANDE WHERE numero = ?";
@@ -155,7 +157,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             if (resultSet.next()) {
                 Order order = mapToObject(resultSet);
 
-                cache.put(order.getId(), order);
+                cacheProvider.cache.put(order.getId(), order);
 
                 SimpleLogger.info("[SELECTED] ORDER with ID: " + id);
                 return Optional.of(order);
@@ -172,6 +174,12 @@ public class OrderDataMapper implements DataMapper<Order> {
     @Override
     public List<Order> selectAll() throws SQLException {
 
+        // Check the cache first
+        if (cacheProvider.isCacheValid()){
+            SimpleLogger.info("[CACHE] Selected all ORDER" );
+            return new ArrayList<>(cacheProvider.cache.values());
+        }
+
         String sql = "SELECT * FROM COMMANDE";
 
         List<Order> orders = new ArrayList<>();
@@ -186,10 +194,13 @@ public class OrderDataMapper implements DataMapper<Order> {
                 Order order = mapToObject(resultSet);
                 orders.add(order);
 
-                cache.put(order.getId(), order);
+                cacheProvider.cache.put(order.getId(), order);
 
                 countOrder++;
             }
+
+            cacheProvider.setCacheValid();
+
             SimpleLogger.info("[SELECTED] ORDER COUNT: " + countOrder);
 
         } catch (SQLException e) {
@@ -220,7 +231,7 @@ public class OrderDataMapper implements DataMapper<Order> {
                     Order order = mapToObject(resultSet);
                     orders.add(order);
 
-                    cache.put(order.getId(), order);
+                    cacheProvider.cache.put(order.getId(), order);
 
                     countOrder++;
                 }
@@ -254,7 +265,7 @@ public class OrderDataMapper implements DataMapper<Order> {
                 Order order = mapToObject(resultSet);
                 orders.add(order);
 
-                cache.put(order.getId(), order);
+                cacheProvider.cache.put(order.getId(), order);
 
                 countOrder++;
             }
