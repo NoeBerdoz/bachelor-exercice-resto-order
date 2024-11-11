@@ -32,6 +32,13 @@ public class CustomerService {
 
         try {
             orders = orderDataMapper.selectWhereCustomerId(customer.getId());
+
+            // This is needed to properly set the products of the order, and therefore the total amount of the order
+            // I'm sorry for this spaghetti
+            for (Order order : orders) {
+                ProductOrderService.getInstance().getProductsFromOrder(order);
+            }
+
             customer.setOrders(orders);
         } catch (SQLException e) {
             e.printStackTrace();

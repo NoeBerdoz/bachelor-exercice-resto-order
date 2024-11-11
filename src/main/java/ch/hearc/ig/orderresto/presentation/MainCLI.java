@@ -1,7 +1,7 @@
 package ch.hearc.ig.orderresto.presentation;
 
 import ch.hearc.ig.orderresto.business.Order;
-import ch.hearc.ig.orderresto.service.RestaurantService;
+import ch.hearc.ig.orderresto.service.ProductOrderService;
 
 public class MainCLI extends AbstractCLI {
     public void run() {
@@ -22,7 +22,7 @@ public class MainCLI extends AbstractCLI {
         OrderCLI orderCLI = new OrderCLI();
         if (userChoice == 1) {
             Order newOrder = orderCLI.createNewOrder();
-            RestaurantService.getInstance().addOrderToRestaurant(newOrder);
+            ProductOrderService.getInstance().addOrderToRestaurant(newOrder);
         } else {
             Order existingOrder = orderCLI.selectOrder();
             if (existingOrder != null) {
