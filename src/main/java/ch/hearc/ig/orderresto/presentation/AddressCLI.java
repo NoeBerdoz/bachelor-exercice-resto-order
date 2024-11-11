@@ -1,7 +1,6 @@
 package ch.hearc.ig.orderresto.presentation;
 
 import ch.hearc.ig.orderresto.business.Address;
-import ch.hearc.ig.orderresto.presentation.AbstractCLI;
 
 public class AddressCLI extends AbstractCLI {
 

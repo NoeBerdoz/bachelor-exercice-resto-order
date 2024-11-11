@@ -1,8 +1,6 @@
 package ch.hearc.ig.orderresto.presentation;
 
 import ch.hearc.ig.orderresto.business.Order;
-import ch.hearc.ig.orderresto.presentation.AbstractCLI;
-import ch.hearc.ig.orderresto.presentation.OrderCLI;
 import ch.hearc.ig.orderresto.service.RestaurantService;
 
 public class MainCLI extends AbstractCLI {

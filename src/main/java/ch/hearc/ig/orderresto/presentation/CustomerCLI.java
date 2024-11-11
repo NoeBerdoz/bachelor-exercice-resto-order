@@ -4,8 +4,6 @@ import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.OrganizationCustomer;
 import ch.hearc.ig.orderresto.business.PrivateCustomer;
-import ch.hearc.ig.orderresto.presentation.AbstractCLI;
-import ch.hearc.ig.orderresto.presentation.AddressCLI;
 import ch.hearc.ig.orderresto.service.CustomerService;
 
 public class CustomerCLI extends AbstractCLI {

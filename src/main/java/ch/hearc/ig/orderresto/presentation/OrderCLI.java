@@ -4,13 +4,7 @@ import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.business.Product;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.presentation.AbstractCLI;
-import ch.hearc.ig.orderresto.presentation.CustomerCLI;
-import ch.hearc.ig.orderresto.presentation.MainCLI;
-import ch.hearc.ig.orderresto.presentation.ProductCLI;
-import ch.hearc.ig.orderresto.presentation.RestaurantCLI;
 import ch.hearc.ig.orderresto.service.CustomerService;
-import ch.hearc.ig.orderresto.service.RestaurantService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
