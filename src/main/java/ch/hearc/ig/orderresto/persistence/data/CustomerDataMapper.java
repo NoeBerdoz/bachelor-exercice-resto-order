@@ -16,7 +16,6 @@ import java.util.*;
 
 
 public class CustomerDataMapper implements DataMapper<Customer> {
-    // TODO manage orders
 
     private static final CustomerDataMapper instance = new CustomerDataMapper();
     private final Map<Long, Customer> cache = new HashMap<>();
@@ -188,7 +187,9 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return Optional.empty();
     }
 
-    @Override public List<Customer> selectAll() throws SQLException {
+    // TODO make this cache compliant
+    @Override
+    public List<Customer> selectAll() throws SQLException {
 
         String sql = "SELECT * FROM CLIENT";
 
