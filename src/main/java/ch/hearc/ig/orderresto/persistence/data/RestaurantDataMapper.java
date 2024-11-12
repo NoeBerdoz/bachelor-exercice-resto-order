@@ -2,8 +2,6 @@ package ch.hearc.ig.orderresto.persistence.data;
 
 import ch.hearc.ig.orderresto.business.Address;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.persistence.filter.Condition;
-import ch.hearc.ig.orderresto.persistence.filter.Filter;
 import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
 import ch.hearc.ig.orderresto.persistence.helper.CacheProvider;
 import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;
@@ -236,55 +234,4 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 .withAddress(address)
                 .build();
     }
-
-    // Retrieve a Restaurant based on a search
-    // WARNING THIS IS NOT PROPERLY IMPLEMENTED
-    public List<Restaurant> selectWhere(Filter filter) {
-
-        StringBuilder sql = new StringBuilder("SELECT * FROM RESTAURANT");
-
-        List<Condition> conditions = filter.getConditions();
-        if (!conditions.isEmpty()) {
-            sql.append(" WHERE ");
-            for (Condition condition : conditions) {
-                sql.append(condition.getColumnName())
-                        .append(" ")
-                        .append(condition.getOperator())
-                        .append(" ? AND ");
-            }
-            // Remove the last " AND "
-            sql.setLength(sql.length() - 5);
-        }
-
-        List<Restaurant> foundRestaurants = new ArrayList<>();
-
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql.toString());
-
-            int index = 1;
-
-            // Prepare SQL query dynamically
-            for (Condition condition : conditions) {
-                if (condition.getOperator().equals("LIKE")) {
-                    statement.setString(index++, condition.getValue().toString());
-                } else {
-                    statement.setObject(index++, condition.getValue());
-                }
-            }
-            Integer countRestaurant = 0;
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                foundRestaurants.add(mapToObject(resultSet));
-                countRestaurant++;
-            }
-            SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
-            return foundRestaurants;
-
-        } catch (SQLException e) {
-            SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());
-            return null;
-        }
-    }
-
 }
