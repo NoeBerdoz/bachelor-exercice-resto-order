@@ -26,43 +26,6 @@ import java.util.Set;public class ProductOrderMapper {
     // not properly implemented as it is a many to many relation
     public final CacheProvider<Long, Set<Product>> cacheProvider = new CacheProvider<>();
 
-    // TODO add cache logic (or maybe delete this method and its service method user)
-    // Currently doesn't support the cache as it would need to complexify the cache logic
-    public Set<Order> selectOrdersWhereProductId(Long productId) throws SQLException {
-
-        String sql = "SELECT * FROM COMMANDE " +
-                     "JOIN PRODUIT_COMMANDE ON COMMANDE.NUMERO = PRODUIT_COMMANDE.FK_COMMANDE " +
-                     "WHERE PRODUIT_COMMANDE.FK_PRODUIT = ?";
-
-        Set<Order> orders = new HashSet<>();
-
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            StatementHelper.bindStatementParameters(statement, productId);
-
-            ResultSet resultSet = statement.executeQuery();
-
-            Integer countOrdersFromProduct = 0;
-            while (resultSet.next()) {
-                Order order = OrderDataMapper.getInstance().mapToObject(resultSet);
-                orders.add(order);
-
-                OrderDataMapper.getInstance().cacheProvider.cache.put(order.getId(), order);
-
-                countOrdersFromProduct++;
-            }
-
-            SimpleLogger.info("[SELECTED] ORDER COUNT: " + countOrdersFromProduct);
-        } catch (SQLException e) {
-            SimpleLogger.error("Error while fetching products by order ID: " + e.getMessage());
-            throw e;
-        }
-
-        return orders;
-    }
-
     // TODO write java doc
     public Set<Product> selectProductsWhereOrder(Order order) throws SQLException {
 

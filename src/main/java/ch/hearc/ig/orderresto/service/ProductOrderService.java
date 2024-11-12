@@ -27,21 +27,6 @@ public class ProductOrderService {
     private final ProductDataMapper productDataMapper = ProductDataMapper.getInstance();
     private final ProductOrderMapper productOrderMapper = ProductOrderMapper.getInstance();
 
-    public Set<Order> getOrdersFromProduct(Product product) {
-        Set <Order> orders = null;
-
-        try {
-            // Set the orders made for the product
-            orders = productOrderMapper.selectOrdersWhereProductId(product.getId());
-            product.setOrders(orders);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return orders;
-    }
-
     public Set<Product> getProductsFromOrder(Order order) {
         Set<Product> products = null;
 
