@@ -19,7 +19,11 @@ public class MainCLI extends AbstractCLI {
         if (userChoice == 0) {
 
             // Close the database connection as the user leaves the application
-            DatabaseConnection.closeConnection();
+            try {
+                DatabaseConnection.closeConnection();
+            } catch (Exception e) {
+                this.ln("Failed to close database connection");
+            }
 
             this.ln("Good bye!");
             return;
