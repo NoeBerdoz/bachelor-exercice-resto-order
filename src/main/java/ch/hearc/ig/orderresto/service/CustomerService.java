@@ -33,8 +33,7 @@ public class CustomerService {
         try {
             orders = orderDataMapper.selectWhereCustomerId(customer.getId());
 
-            // This is needed to properly set the products of the order, and therefore the total amount of the order
-            // I'm sorry for this spaghetti
+            // set the products of the order, and therefore the total amount of the order
             for (Order order : orders) {
                 ProductOrderService.getInstance().getProductsFromOrder(order);
             }

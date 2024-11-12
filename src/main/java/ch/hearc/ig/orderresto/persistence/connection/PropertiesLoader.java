@@ -6,9 +6,6 @@ import java.util.Properties;
 
 public class PropertiesLoader {
 
-    // TODO
-    // When properties are absent, let user put it in CLI
-
     private Properties properties;
 
     public PropertiesLoader(String filePath) {

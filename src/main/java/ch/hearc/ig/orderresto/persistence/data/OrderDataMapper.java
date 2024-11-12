@@ -222,41 +222,55 @@ public class OrderDataMapper implements DataMapper<Order> {
     }
 
     public Set<Order> selectWhereRestaurantId(Long restaurantId) throws SQLException {
-            // TODO make this cache compliant
 
-            String sql = "SELECT * FROM COMMANDE WHERE fk_resto = ?";
+        // Check the cache first, fill it if it is invalid
+        if (!ProductOrderMapper.cacheProvider.isCacheValid()) {
+            ProductOrderMapper.getInstance().selectAll();
+        } else {
+            SimpleLogger.info("[CACHE] Selected ORDER WHERE ORDER RESTAURANT ID: " + restaurantId);
+            return RestaurantDataMapper.cacheProvider.cache.get(restaurantId).getOrders();
+        }
 
-            Set<Order> orders = new HashSet<>();
+        String sql = "SELECT * FROM COMMANDE WHERE fk_resto = ?";
 
-            try {
-                Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
+        Set<Order> orders = new HashSet<>();
 
-                StatementHelper.bindStatementParameters(statement, restaurantId);
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);
 
-                ResultSet resultSet = statement.executeQuery();
+            StatementHelper.bindStatementParameters(statement, restaurantId);
 
-                Integer countOrder = 0;
-                while (resultSet.next()) {
-                    Order order = mapToObject(resultSet);
-                    orders.add(order);
+            ResultSet resultSet = statement.executeQuery();
 
-                    cacheProvider.cache.put(order.getId(), order);
+            Integer countOrder = 0;
+            while (resultSet.next()) {
+                Order order = mapToObject(resultSet);
+                orders.add(order);
 
-                    countOrder++;
-                }
-                SimpleLogger.info("[SELECTED] RESTAURANT ORDER COUNT: " + countOrder);
+                cacheProvider.cache.put(order.getId(), order);
 
-            } catch (SQLException e) {
-                SimpleLogger.error("Error while fetching orders by restaurant ID: " + e.getMessage());
-                throw e;
+                countOrder++;
             }
+            SimpleLogger.info("[SELECTED] RESTAURANT ORDER COUNT: " + countOrder);
 
-            return orders;
+        } catch (SQLException e) {
+            SimpleLogger.error("Error while fetching orders by restaurant ID: " + e.getMessage());
+            throw e;
+        }
+
+        return orders;
     }
 
-    // TODO make this cache compliant
     public Set<Order> selectWhereCustomerId(Long customerId) throws SQLException {
+
+        // Check the cache first, fill it if it is invalid
+        if (!ProductOrderMapper.cacheProvider.isCacheValid()) {
+            ProductOrderMapper.getInstance().selectAll();
+        } else {
+            SimpleLogger.info("[CACHE] Selected ORDER WHERE ORDER CUSTOMER ID: " + customerId);
+            return CustomerDataMapper.cacheProvider.cache.get(customerId).getOrders();
+        }
 
         String sql = "SELECT * FROM COMMANDE WHERE fk_client = ?";
 

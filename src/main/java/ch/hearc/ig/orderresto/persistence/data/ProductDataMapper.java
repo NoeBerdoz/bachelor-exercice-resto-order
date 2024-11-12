@@ -224,8 +224,20 @@ public class ProductDataMapper implements DataMapper<Product> {
         return products;
     }
 
+    // TODO in the future, we should handle the cache properly
     public Set<Product> selectWhereRestaurantId(Long restaurantId) throws SQLException {
-        // TODO make this cache compliant
+
+        // check the cache first, if the restaurants objects contains product, we don't need to fetch them again
+        // as the product of a restaurant is not supposed to change (yes I know it's not a perfect implementation but
+        // I don't have time to do it properly
+        if (
+                RestaurantDataMapper.cacheProvider.isCacheValid()
+                && RestaurantDataMapper.cacheProvider.cache.containsKey(restaurantId)
+                && !RestaurantDataMapper.cacheProvider.cache.get(restaurantId).getProductsCatalog().isEmpty()
+        ) {
+            SimpleLogger.info("[CACHE] Selected PRODUCT WHERE RESTAURANT ID: " + restaurantId);
+            return RestaurantDataMapper.cacheProvider.cache.get(restaurantId).getProductsCatalog();
+        }
 
         String sql = "SELECT * FROM PRODUIT WHERE FK_RESTO = ?";
 
@@ -247,6 +259,8 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                 countProduct++;
             }
+            RestaurantDataMapper.cacheProvider.cache.get(restaurantId).setProductsCatalog(products);
+
             SimpleLogger.info("[SELECTED] PRODUCT COUNT: " + countProduct);
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching products: " + e.getMessage());
