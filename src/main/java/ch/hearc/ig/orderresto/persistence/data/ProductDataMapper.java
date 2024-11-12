@@ -30,10 +30,10 @@ public class ProductDataMapper implements DataMapper<Product> {
 
         String sql = "INSERT INTO PRODUIT (FK_RESTO, PRIX_UNITAIRE, NOM, DESCRIPTION) VALUES (?, ?, ?, ?)";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
             StatementHelper.bindStatementParameters(
                     statement,
                     product.getRestaurant().getId(),
@@ -57,8 +57,10 @@ public class ProductDataMapper implements DataMapper<Product> {
                     return true;
                 }
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while inserting product: " + e.getMessage());
             throw e;
         }
@@ -72,10 +74,10 @@ public class ProductDataMapper implements DataMapper<Product> {
 
         String sql = "UPDATE PRODUIT SET FK_RESTO = ?, PRIX_UNITAIRE = ?, NOM = ?, DESCRIPTION = ? WHERE NUMERO = ?";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
             StatementHelper.bindStatementParameters(
                     statement,
                     product.getRestaurant().getId(),
@@ -95,7 +97,10 @@ public class ProductDataMapper implements DataMapper<Product> {
             } else {
                 SimpleLogger.warning("[UPDATED] NO PRODUCT TO UPDATE WITH ID: " + product.getId());
             }
+            connection.commit();
+
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while updating product: " + e.getMessage());
             throw e;
         }
@@ -106,10 +111,12 @@ public class ProductDataMapper implements DataMapper<Product> {
     // Delete a Product in the database based on its id
     @Override
     public boolean delete(Product product) throws SQLException {
+
         String sql = "DELETE FROM PRODUIT WHERE NUMERO = ?";
 
+        Connection connection = DatabaseConnection.getConnection();
+
         try {
-            Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
             StatementHelper.bindStatementParameters(statement, product.getId());
@@ -124,8 +131,10 @@ public class ProductDataMapper implements DataMapper<Product> {
             } else {
                 SimpleLogger.warning("[DELETED] NO PRODUCT FOUND WITH ID: " + product.getId());
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while deleting product: " + e.getMessage());
             throw e;
         }

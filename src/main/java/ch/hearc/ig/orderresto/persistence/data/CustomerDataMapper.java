@@ -33,10 +33,10 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
         String sql = "INSERT INTO CLIENT (email, telephone, nom, code_postal, localite, rue, num_rue, pays, est_une_femme, prenom, forme_sociale, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
             StatementHelper.bindStatementParameters(
                     statement,
                     customer.getEmail(),
@@ -68,8 +68,10 @@ public class CustomerDataMapper implements DataMapper<Customer> {
                     return true;
                 }
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while inserting customer: " + e.getMessage());
             throw e;
         }
@@ -82,11 +84,10 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
         String sql = "UPDATE CLIENT SET email = ?, telephone = ?, nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ?, est_une_femme = ?, prenom = ?, forme_sociale = ?, type = ? WHERE NUMERO = ?";
 
+        Connection connection = DatabaseConnection.getConnection();
+
         try {
-            Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
-
-
             StatementHelper.bindStatementParameters(
                     statement,
                     customer.getEmail(),
@@ -114,7 +115,10 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             } else {
                 SimpleLogger.error("[UPDATED] NO CUSTOMER TO UPDATE WITH ID: " + customer.getId());
             }
+            connection.commit();
+
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while updating customer: " + e.getMessage());
             throw e;
         }
@@ -124,12 +128,13 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
     @Override
     public boolean delete(Customer customer) throws SQLException {
+
         String sql = "DELETE FROM CLIENT WHERE NUMERO = ?";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
             StatementHelper.bindStatementParameters(
                     statement,
                     customer.getId()
@@ -145,8 +150,10 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             } else {
                 SimpleLogger.warning("[DELETED] NO CUSTOMER TO DELETE WITH ID: " + customer.getId());
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while deleting customer: " + e.getMessage());
             throw e;
         }

@@ -8,9 +8,7 @@ import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;import ch.hearc
 
 import java.math.BigDecimal;
 import java.sql.Connection;import java.sql.PreparedStatement;import java.sql.ResultSet;import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;public class ProductOrderMapper {
 
     private static ProductOrderMapper instance;
@@ -125,8 +123,9 @@ import java.util.Set;public class ProductOrderMapper {
 
         String sql = "INSERT INTO PRODUIT_COMMANDE (FK_PRODUIT, FK_COMMANDE) VALUES (?,?)";
 
+        Connection connection = DatabaseConnection.getConnection();
+
         try {
-            Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
             StatementHelper.bindStatementParameters(
@@ -144,19 +143,23 @@ import java.util.Set;public class ProductOrderMapper {
 
                 SimpleLogger.info("[INSERTED] PRODUCT ORDER RELATION with PRODUCT ID: " + product.getId() + " and ORDER ID: " + product.getId());
             }
+            connection.commit();
 
             return true;
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while inserting product order relation: " + e.getMessage());
             throw e;
         }
     }
 
     public boolean deleteProductOrderRelation(Long orderId) throws SQLException {
+
         String sql = "DELETE FROM PRODUIT_COMMANDE WHERE FK_COMMANDE = ?";
 
+        Connection connection = DatabaseConnection.getConnection();
+
         try {
-            Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
 
             StatementHelper.bindStatementParameters(
@@ -172,7 +175,10 @@ import java.util.Set;public class ProductOrderMapper {
             } else {
                 SimpleLogger.info("[DELETED] NO ORDER FOUND IN PRODUCT ORDER RELATION with ORDER ID: " + orderId);
             }
+            connection.commit();
+
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while deleting product order relation: " + e.getMessage());
             throw e;
         }

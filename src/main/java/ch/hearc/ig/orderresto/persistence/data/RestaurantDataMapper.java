@@ -28,10 +28,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         String sql = "INSERT INTO RESTAURANT (nom, code_postal, localite, rue, num_rue, pays) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
             StatementHelper.bindStatementParameters(
                     statement,
                     restaurant.getName(),
@@ -57,8 +57,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                     return true;
                 }
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while inserting restaurant: " + e.getMessage());
             throw e;
         }
@@ -70,12 +72,12 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     @Override
     public boolean update(Restaurant restaurant) throws SQLException {
 
+        Connection connection = DatabaseConnection.getConnection();
+
         String sql = "UPDATE RESTAURANT SET nom = ?, code_postal = ?, localite = ?, rue = ?, num_rue = ?, pays = ? WHERE numero = ?";
 
         try {
-            Connection connection = DatabaseConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
-
             StatementHelper.bindStatementParameters(
                     statement,
                     restaurant.getName(),
@@ -97,7 +99,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             } else {
                 SimpleLogger.warning("[UPDATED] NO RESTAURANT TO UPDATE WITH ID: " + restaurant.getId());
             }
+            connection.commit();
+
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while updating restaurant: " + e.getMessage());
             throw e;
         }
@@ -108,12 +113,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
     // Delete a Restaurant in the database based on its id
     @Override
     public boolean delete(Restaurant restaurant) throws SQLException {
+
         String sql = "DELETE FROM RESTAURANT WHERE NUMERO = ?";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
             StatementHelper.bindStatementParameters(
                     statement,
                     restaurant.getId()
@@ -129,8 +135,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             } else {
                 SimpleLogger.warning("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while deleting restaurant: " + e.getMessage());
             throw e;
         }

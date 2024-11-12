@@ -29,10 +29,10 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         String sql = "INSERT INTO COMMANDE (fk_client, fk_resto, a_emporter, quand) VALUES (?, ?, ?, ?)";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"NUMERO"});
             StatementHelper.bindStatementParameters(
                     statement,
                     order.getCustomer().getId(),
@@ -56,8 +56,10 @@ public class OrderDataMapper implements DataMapper<Order> {
                     return true;
                 }
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while inserting order: " + e.getMessage());
             throw e;
         }
@@ -67,12 +69,13 @@ public class OrderDataMapper implements DataMapper<Order> {
 
     @Override
     public boolean update(Order order) throws SQLException {
+
         String sql = "UPDATE COMMANDE SET fk_client = ?, fk_resto = ?, a_emporter = ?, quand = ? WHERE numero = ?";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
             StatementHelper.bindStatementParameters(
                     statement,
                     order.getCustomer().getId(),
@@ -92,8 +95,10 @@ public class OrderDataMapper implements DataMapper<Order> {
             } else {
                 SimpleLogger.warning("[UPDATED] NO ORDER TO UPDATE WITH ID: " + order.getId());
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while updating order: " + e.getMessage());
             throw e;
         }
@@ -106,10 +111,10 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         String sql = "DELETE FROM COMMANDE WHERE numero = ?";
 
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
+        Connection connection = DatabaseConnection.getConnection();
 
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
             StatementHelper.bindStatementParameters(
                     statement,
                     order.getId()
@@ -125,8 +130,10 @@ public class OrderDataMapper implements DataMapper<Order> {
             } else {
                 SimpleLogger.warning("[DELETED] NO ORDER TO DELETE WITH ID: " + order.getId());
             }
+            connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             SimpleLogger.error("Error while deleting order: " + e.getMessage());
             throw e;
         }
