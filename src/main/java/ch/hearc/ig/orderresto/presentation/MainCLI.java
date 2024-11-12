@@ -1,6 +1,7 @@
 package ch.hearc.ig.orderresto.presentation;
 
 import ch.hearc.ig.orderresto.business.Order;
+import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
 import ch.hearc.ig.orderresto.service.ProductOrderService;
 
 public class MainCLI extends AbstractCLI {
@@ -16,6 +17,10 @@ public class MainCLI extends AbstractCLI {
 
     private void handleUserChoice(int userChoice) {
         if (userChoice == 0) {
+
+            // Close the database connection as the user leaves the application
+            DatabaseConnection.closeConnection();
+
             this.ln("Good bye!");
             return;
         }
