@@ -9,7 +9,9 @@ import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;import ch.hearc
 import java.math.BigDecimal;
 import java.sql.Connection;import java.sql.PreparedStatement;import java.sql.ResultSet;import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Set;public class ProductOrderMapper {
+import java.util.Set;
+
+public class ProductOrderMapper {
 
     private static ProductOrderMapper instance;
 
@@ -24,7 +26,7 @@ import java.util.Set;public class ProductOrderMapper {
 
     // store each product id made for an order id
     // not properly implemented as it is a many to many relation
-    public final CacheProvider<Long, Set<Product>> cacheProvider = new CacheProvider<>();
+    public static final CacheProvider<Long, Set<Product>> cacheProvider = new CacheProvider<>();
 
     // TODO write java doc
     public Set<Product> selectProductsWhereOrder(Order order) throws SQLException {

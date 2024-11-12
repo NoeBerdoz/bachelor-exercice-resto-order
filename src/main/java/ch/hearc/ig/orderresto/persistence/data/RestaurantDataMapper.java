@@ -12,15 +12,18 @@ import java.util.*;
 
 public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
-    private static final RestaurantDataMapper instance = new RestaurantDataMapper();
-
-    private final CacheProvider<Long, Restaurant> cacheProvider = new CacheProvider<>();
+    private static RestaurantDataMapper instance;
 
     public RestaurantDataMapper() {}
 
     public static RestaurantDataMapper getInstance() {
+        if (instance == null) {
+            instance = new RestaurantDataMapper();
+        }
         return instance;
     }
+
+    public static final CacheProvider<Long, Restaurant> cacheProvider = new CacheProvider<>();
 
     // Insert a Restaurant to the database.
     @Override

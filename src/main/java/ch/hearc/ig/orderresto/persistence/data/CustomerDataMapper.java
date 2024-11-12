@@ -18,15 +18,18 @@ import java.util.*;
 
 public class CustomerDataMapper implements DataMapper<Customer> {
 
-    private static final CustomerDataMapper instance = new CustomerDataMapper();
-
-    private final CacheProvider<Long, Customer> cacheProvider = new CacheProvider<>();
+    private static CustomerDataMapper instance;
 
     public CustomerDataMapper() {}
 
     public static CustomerDataMapper getInstance() {
+        if (instance == null) {
+            instance = new CustomerDataMapper();
+        }
         return instance;
     }
+
+    public static final CacheProvider<Long, Customer> cacheProvider = new CacheProvider<>();
 
     @Override
     public boolean insert(Customer customer) throws SQLException {

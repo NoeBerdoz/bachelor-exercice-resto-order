@@ -14,15 +14,18 @@ import java.util.*;
 
 public class ProductDataMapper implements DataMapper<Product> {
 
-    private static final ProductDataMapper instance = new ProductDataMapper();
-
-    public final CacheProvider<Long, Product> cacheProvider = new CacheProvider<>();
+    private static ProductDataMapper instance;
 
     public ProductDataMapper() {}
 
     public static ProductDataMapper getInstance() {
+        if(instance == null) {
+            instance = new ProductDataMapper();
+        }
         return instance;
     }
+
+    public static final CacheProvider<Long, Product> cacheProvider = new CacheProvider<>();
 
     // Insert a Product to the database.
     @Override

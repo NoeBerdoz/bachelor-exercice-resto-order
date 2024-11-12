@@ -14,15 +14,18 @@ import java.util.*;
 
 public class OrderDataMapper implements DataMapper<Order> {
 
-    private static final OrderDataMapper instance = new OrderDataMapper();
-
-    public final CacheProvider<Long, Order> cacheProvider = new CacheProvider<>();
+    private static OrderDataMapper instance;
 
     public OrderDataMapper() {}
 
     public static OrderDataMapper getInstance() {
+        if (instance == null) {
+            instance = new OrderDataMapper();
+        }
         return instance;
     }
+
+    public static final CacheProvider<Long, Order> cacheProvider = new CacheProvider<>();
 
     @Override
     public boolean insert(Order order) throws SQLException {
