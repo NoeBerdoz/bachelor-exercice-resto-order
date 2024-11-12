@@ -199,7 +199,6 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return Optional.empty();
     }
 
-    // TODO make this cache compliant
     @Override
     public List<Customer> selectAll() throws SQLException {
 
