@@ -20,7 +20,8 @@ public class StatementHelper {
                 } else if (parameter instanceof BigDecimal) {
                     statement.setBigDecimal(i + 1, (BigDecimal) parameter);
                 } else if (parameter instanceof Boolean) {
-                    statement.setString(i + 1, (Boolean) parameter ? "O" : "N");  // Oracle doesn't handle native boolean type
+                    // Oracle doesn't handle native boolean type, in database it's stored as 'O' for True and 'N' for False.
+                    statement.setString(i + 1, (Boolean) parameter ? "O" : "N");
                 } else {
                     statement.setObject(i + 1, parameter);
                 }
