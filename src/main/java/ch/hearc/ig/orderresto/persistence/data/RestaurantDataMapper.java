@@ -53,7 +53,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
                 if (generatedKeys.next()) {
                     String generatedId = generatedKeys.getString(1);
                     restaurant.setId(Long.valueOf(generatedId));
-                    SimpleLogger.info("[INSERTED] RESTAURANT WITH ID: " + restaurant.getId());
+                    SimpleLogger.info("[DB][INSERTED] RESTAURANT ID: " + restaurant.getId());
 
                     cacheProvider.cache.put(restaurant.getId(), restaurant);
 
@@ -95,14 +95,14 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[UPDATED] RESTAURANT WITH ID: " + restaurant.getId());
+                SimpleLogger.info("[DB][UPDATED] RESTAURANT ID: " + restaurant.getId());
 
                 cacheProvider.cache.put(restaurant.getId(), restaurant);
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[UPDATED] NO RESTAURANT TO UPDATE WITH ID: " + restaurant.getId());
+                SimpleLogger.warning("[DB][UPDATE] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
             }
 
         } catch (SQLException e) {
@@ -132,14 +132,14 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[DELETED] RESTAURANT WITH ID: " + restaurant.getId());
+                SimpleLogger.info("[DB][DELETED] RESTAURANT ID: " + restaurant.getId());
 
                 cacheProvider.cache.remove(restaurant.getId());
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
+                SimpleLogger.warning("[DB][DELETE] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
             }
 
         } catch (SQLException e) {
@@ -158,7 +158,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         // Check the cache first
         if (cacheProvider.cache.containsKey(id)) {
-            SimpleLogger.info("[CACHE] Selected RESTAURANT with ID: " + id);
+            SimpleLogger.info("[CACHE][SELECTED] RESTAURANT ID: " + id);
             return Optional.of(cacheProvider.cache.get(id));
         }
 
@@ -177,7 +177,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
                 cacheProvider.cache.put(restaurant.getId(), restaurant);
 
-                SimpleLogger.info("[SELECTED] RESTAURANT with ID: " + id);
+                SimpleLogger.info("[DB][SELECTED] RESTAURANT ID: " + id);
                 return Optional.of(restaurant);
             }
 
@@ -196,7 +196,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
         // Check the cache first
         if (cacheProvider.isCacheValid()){
-            SimpleLogger.info("[CACHE] Selected all RESTAURANT" );
+            SimpleLogger.info("[CACHE][SELECTED] ALL RESTAURANT" );
             return new ArrayList<>(cacheProvider.cache.values());
         }
 
@@ -209,20 +209,17 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countRestaurant = 0;
             while (resultSet.next()) {
                 Restaurant restaurant = mapToObject(resultSet);
                 restaurants.add(restaurant);
 
                 cacheProvider.cache.put(restaurant.getId(), restaurant);
-
-                countRestaurant++;
             }
 
             // set cache valid, we want to fetch the all data only once
             cacheProvider.setCacheValid();
 
-            SimpleLogger.info("[SELECTED] RESTAURANT COUNT: " + countRestaurant);
+            SimpleLogger.info("[DB][SELECTED] ALL RESTAURANT");
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching restaurants: " + e.getMessage());
             throw e;

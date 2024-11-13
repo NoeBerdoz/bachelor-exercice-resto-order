@@ -64,7 +64,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
                 if (generatedKeys.next()) {
                     String generatedId = generatedKeys.getString(1);
                     customer.setId(Long.valueOf(generatedId));
-                    SimpleLogger.info("[INSERTED] CUSTOMER WITH ID: " + customer.getId());
+                    SimpleLogger.info("[DB][INSERTED] CUSTOMER ID: " + customer.getId());
 
                     cacheProvider.cache.put(customer.getId(), customer);
 
@@ -111,14 +111,14 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[UPDATED] CUSTOMER WITH ID: " + customer.getId());
+                SimpleLogger.info("[DB][UPDATED] CUSTOMER ID: " + customer.getId());
 
                 cacheProvider.cache.put(customer.getId(), customer);
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.error("[UPDATED] NO CUSTOMER TO UPDATE WITH ID: " + customer.getId());
+                SimpleLogger.error("[DB][UPDATE] NO CUSTOMER FOUND WITH ID: " + customer.getId());
             }
 
         } catch (SQLException e) {
@@ -147,14 +147,14 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[DELETED] CUSTOMER WITH ID: " + customer.getId());
+                SimpleLogger.info("[DB][DELETED] CUSTOMER ID: " + customer.getId());
 
                 cacheProvider.cache.remove(customer.getId());
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[DELETED] NO CUSTOMER TO DELETE WITH ID: " + customer.getId());
+                SimpleLogger.warning("[DB][DELETE] NO CUSTOMER FOUND WITH ID: " + customer.getId());
             }
 
         } catch (SQLException e) {
@@ -171,7 +171,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
     public Optional<Customer> selectById(Long id) throws SQLException {
 
         if (cacheProvider.cache.containsKey(id)) {
-            SimpleLogger.info("[CACHE] Selected CUSTOMER with ID: " + id);
+            SimpleLogger.info("[CACHE][SELECTED] CUSTOMER ID: " + id);
             return Optional.of(cacheProvider.cache.get(id));
         }
 
@@ -190,7 +190,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
                 cacheProvider.cache.put(customer.getId(), customer);
 
-                SimpleLogger.info("[SELECTED] CUSTOMER with ID: " + id);
+                SimpleLogger.info("[DB][SELECTED] CUSTOMER ID: " + id);
                 return Optional.of(customer);
             }
 
@@ -207,7 +207,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
         // Check the cache first
         if (cacheProvider.isCacheValid()){
-            SimpleLogger.info("[CACHE] Selected all CUSTOMER" );
+            SimpleLogger.info("[CACHE][SELECTED] ALL CUSTOMER" );
             return new ArrayList<>(cacheProvider.cache.values());
         }
 
@@ -220,19 +220,16 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countCustomer = 0;
             while (resultSet.next()) {
                 Customer customer = mapToObject(resultSet);
                 customers.add(customer);
 
                 cacheProvider.cache.put(customer.getId(), customer);
-
-                countCustomer++;
             }
 
             cacheProvider.setCacheValid();
 
-            SimpleLogger.info("[SELECTED] CLIENT COUNT: " + countCustomer);
+            SimpleLogger.info("[DB][SELECTED] ALL CUSTOMER");
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching all customers: " + e.getMessage());

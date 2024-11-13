@@ -5,8 +5,8 @@ import ch.hearc.ig.orderresto.business.Product;
 import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
 import ch.hearc.ig.orderresto.persistence.data.ProductDataMapper;
 import ch.hearc.ig.orderresto.persistence.data.ProductOrderMapper;
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Set;
 
@@ -35,7 +35,7 @@ public class ProductOrderService {
             products = productOrderMapper.selectProductsWhereOrder(order);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get the products of an order: " + e.getMessage() );
         }
 
         return products;
@@ -50,7 +50,7 @@ public class ProductOrderService {
             }
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to add an order to the restaurant: " + e.getMessage() );
         }
 
         return false;
@@ -61,7 +61,7 @@ public class ProductOrderService {
         try {
             return productDataMapper.insert(product);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to add a product to the restaurant: " + e.getMessage() );
         }
 
         return false;
@@ -72,7 +72,7 @@ public class ProductOrderService {
         try {
             return orderDataMapper.update(order);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to modify an order: " + e.getMessage() );
         }
 
         return false;
@@ -83,7 +83,7 @@ public class ProductOrderService {
         try {
             return productDataMapper.update(product);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to modify a product: " + e.getMessage() );
         }
 
         return false;
@@ -95,7 +95,7 @@ public class ProductOrderService {
             productOrderMapper.deleteProductOrderRelation(order.getId());
             return orderDataMapper.delete(order);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to remove an order: " + e.getMessage() );
         }
 
         return false;
@@ -107,7 +107,7 @@ public class ProductOrderService {
         try {
             return productDataMapper.delete(product);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to remove a product: " + e.getMessage() );
         }
 
         return false;

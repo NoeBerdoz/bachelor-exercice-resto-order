@@ -5,6 +5,7 @@ import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.business.PrivateCustomer;
 import ch.hearc.ig.orderresto.persistence.data.CustomerDataMapper;
 import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -40,7 +41,7 @@ public class CustomerService {
 
             customer.setOrders(orders);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get the orders of a customer: " + e.getMessage() );
         }
 
         return orders;
@@ -59,7 +60,7 @@ public class CustomerService {
             }
             return customerDataMapper.insert(customer);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to add a customer: " + e.getMessage());
         }
 
         return false;
@@ -70,7 +71,7 @@ public class CustomerService {
         try {
             return customerDataMapper.update(customer);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to modify a customer: " + e.getMessage());
         }
 
         return false;
@@ -81,7 +82,7 @@ public class CustomerService {
         try {
             return customerDataMapper.delete(customer);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to remove a customer: " + e.getMessage());
         }
 
         return false;
@@ -92,7 +93,7 @@ public class CustomerService {
         try {
             return customerDataMapper.selectById(id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get a customer by id: " + e.getMessage());
         }
 
         return Optional.empty();
@@ -103,7 +104,7 @@ public class CustomerService {
         try {
             return customerDataMapper.selectAll();
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get all customers: " + e.getMessage());
         }
 
         return List.of();

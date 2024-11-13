@@ -53,7 +53,7 @@ public class ProductDataMapper implements DataMapper<Product> {
                 if (generatedKeys.next()) {
                     String generatedId = generatedKeys.getString(1);
                     product.setId(Long.valueOf(generatedId));
-                    SimpleLogger.info("[INSERTED] PRODUCT WITH ID: " + product.getId());
+                    SimpleLogger.info("[DB][INSERTED] PRODUCT ID: " + product.getId());
 
                     cacheProvider.cache.put(product.getId(), product);
 
@@ -93,14 +93,14 @@ public class ProductDataMapper implements DataMapper<Product> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[UPDATED] PRODUCT WITH ID: " + product.getId());
+                SimpleLogger.info("[DB][UPDATED] PRODUCT ID: " + product.getId());
 
                 cacheProvider.cache.put(product.getId(), product);
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[UPDATED] NO PRODUCT TO UPDATE WITH ID: " + product.getId());
+                SimpleLogger.warning("[DB][UPDATE] NO PRODUCT FOUND WITH ID: " + product.getId());
             }
 
         } catch (SQLException e) {
@@ -128,14 +128,14 @@ public class ProductDataMapper implements DataMapper<Product> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[DELETED] PRODUCT WITH ID: " + product.getId());
+                SimpleLogger.info("[DB][DELETED] PRODUCT ID: " + product.getId());
 
                 cacheProvider.cache.remove(product.getId());
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[DELETED] NO PRODUCT FOUND WITH ID: " + product.getId());
+                SimpleLogger.warning("[DB][DELETE] NO PRODUCT FOUND WITH ID " + product.getId());
             }
 
         } catch (SQLException e) {
@@ -154,7 +154,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
         // Check the cache first
         if (cacheProvider.cache.containsKey(id)) {
-            SimpleLogger.info("[CACHE] Selected PRODUCT with ID: " + id);
+            SimpleLogger.info("[CACHE][SELECTED] PRODUCT ID: " + id);
             return Optional.of(cacheProvider.cache.get(id));
         }
 
@@ -173,7 +173,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                 cacheProvider.cache.put(product.getId(), product);
 
-                SimpleLogger.info("[SELECTED] PRODUCT with ID: " + id);
+                SimpleLogger.info("[DB][SELECTED] PRODUCT ID: " + id);
                 return Optional.of(product);
             }
 
@@ -192,7 +192,7 @@ public class ProductDataMapper implements DataMapper<Product> {
 
         // Check the cache first
         if (cacheProvider.isCacheValid()){
-            SimpleLogger.info("[CACHE] Selected all PRODUCT" );
+            SimpleLogger.info("[CACHE][SELECTED] ALL PRODUCT" );
             return new ArrayList<>(cacheProvider.cache.values());
         }
 
@@ -206,19 +206,16 @@ public class ProductDataMapper implements DataMapper<Product> {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countProduct = 0;
             while (resultSet.next()) {
                 Product product = mapToObject(resultSet);
                 products.add(product);
 
                 cacheProvider.cache.put(product.getId(), product);
-
-                countProduct++;
             }
 
             cacheProvider.setCacheValid();
 
-            SimpleLogger.info("[SELECTED] PRODUCT COUNT: " + countProduct);
+            SimpleLogger.info("[DB][SELECTED] ALL PRODUCT");
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching products: " + e.getMessage());
             throw e;
@@ -244,7 +241,7 @@ public class ProductDataMapper implements DataMapper<Product> {
                 }
             }
             if (isFoundInCache) {
-                SimpleLogger.info("[CACHE] Selected PRODUCT WHERE RESTAURANT ID: " + restaurantId);
+                SimpleLogger.info("[CACHE][SELECTED] PRODUCT WHERE RESTAURANT ID: " + restaurantId);
                 return products;
             }
         }
@@ -258,18 +255,15 @@ public class ProductDataMapper implements DataMapper<Product> {
 
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countProduct = 0;
             while (resultSet.next()) {
                 Product product = mapToObject(resultSet);
                 products.add(product);
 
                 cacheProvider.cache.put(product.getId(), product);
-
-                countProduct++;
             }
             RestaurantDataMapper.cacheProvider.cache.get(restaurantId).setProductsCatalog(products);
 
-            SimpleLogger.info("[SELECTED] PRODUCT COUNT: " + countProduct);
+            SimpleLogger.info("[SELECTED] PRODUCT WHERE RESTAURANT ID: " + restaurantId);
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching products: " + e.getMessage());
             throw e;

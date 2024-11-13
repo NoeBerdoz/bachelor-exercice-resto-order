@@ -8,9 +8,7 @@ import ch.hearc.ig.orderresto.persistence.helper.StatementHelper;import ch.hearc
 
 import java.math.BigDecimal;
 import java.sql.Connection;import java.sql.PreparedStatement;import java.sql.ResultSet;import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class ProductOrderMapper {
@@ -53,7 +51,7 @@ public class ProductOrderMapper {
 
             cacheProvider.setCacheValid();
 
-            SimpleLogger.info("[SELECTED] ALL ProductOrder ");
+            SimpleLogger.info("[SELECTED] ALL PRODUCT_ORDER");
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching all product order relations: " + e.getMessage());
             throw e;
@@ -65,7 +63,7 @@ public class ProductOrderMapper {
 
         // Check the cache first
         if (cacheProvider.isCacheValid() && cacheProvider.cache.containsKey(order.getId())) {
-            SimpleLogger.info("[CACHE] SELECTED PRODUCT ORDER WHERE ORDER ID: " + order.getId());
+            SimpleLogger.info("[CACHE][SELECTED] PRODUCT WHERE PRODUCT_ORDER ORDER ID: " + order.getId());
             return cacheProvider.cache.get(order.getId());
         }
 
@@ -85,7 +83,6 @@ public class ProductOrderMapper {
 
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countProductsInOrder = 0;
             while (resultSet.next()) {
                 Product product = ProductDataMapper.getInstance().mapToObject(resultSet);
                 products.add(product);
@@ -93,7 +90,6 @@ public class ProductOrderMapper {
                 // Update Product cache
                 ProductDataMapper.cacheProvider.cache.put(product.getId(), product);
                 cacheProvider.cache.get(order.getId()).add(product);
-                countProductsInOrder++;
             }
 
             // Update Order according to the freshly fetched products
@@ -107,7 +103,7 @@ public class ProductOrderMapper {
             order.setTotalAmount(orderTotalPrice);
             OrderDataMapper.cacheProvider.cache.put(order.getId(), order);
 
-            SimpleLogger.info("[SELECTED] ORDER COUNT: " + countProductsInOrder + " FROM selectProductsWhereOrder in ProductOrderMapper");
+            SimpleLogger.info("[DB][SELECTED] PRODUCT WHERE PRODUCT_ORDER ORDER ID: " + order.getId());
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching products by order ID: " + e.getMessage());
             throw e;
@@ -145,7 +141,7 @@ public class ProductOrderMapper {
                         .computeIfAbsent(order.getId(), k -> order) // Adds the order if not present
                         .getProducts().add(product); // Add product to the order's products
 
-                SimpleLogger.info("[INSERTED] PRODUCT ORDER RELATION with PRODUCT ID: " + product.getId() + " and ORDER ID: " + product.getId());
+                SimpleLogger.info("[DB][INSERTED] PRODUCT_ORDER PRODUCT ID: " + product.getId() + " ORDER ID: " + product.getId());
 
                 connection.commit();
                 return true;
@@ -178,12 +174,12 @@ public class ProductOrderMapper {
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
                 cacheProvider.cache.remove(orderId);
-                SimpleLogger.info("[DELETED] PRODUCT ORDER RELATION with ORDER ID: " + orderId);
+                SimpleLogger.info("[DB][DELETED] PRODUCT_ORDER WHERE ORDER ID: " + orderId);
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.info("[DELETED] NO ORDER FOUND IN PRODUCT ORDER RELATION with ORDER ID: " + orderId);
+                SimpleLogger.info("[DB][DELETED] NO PRODUCT_ORDER FOUND WITH ORDER ID: " + orderId);
             }
 
         } catch (SQLException e) {

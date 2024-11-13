@@ -6,6 +6,7 @@ import ch.hearc.ig.orderresto.business.Restaurant;
 import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
 import ch.hearc.ig.orderresto.persistence.data.ProductDataMapper;
 import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -35,7 +36,7 @@ public class RestaurantService {
             orders = orderDataMapper.selectWhereRestaurantId(restaurant.getId());
             restaurant.setOrders(orders);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get the orders of a restaurant: " + e.getMessage() );
         }
 
         return orders;
@@ -48,7 +49,7 @@ public class RestaurantService {
             products = productDataMapper.selectWhereRestaurantId(restaurant.getId());
             restaurant.setProductsCatalog(products);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get the products of a restaurant: " + e.getMessage() );
         }
 
         return products;
@@ -59,7 +60,7 @@ public class RestaurantService {
         try {
             return restaurantDataMapper.selectById(id);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get a restaurant by id: " + e.getMessage() );
         }
 
         return Optional.empty();
@@ -70,7 +71,7 @@ public class RestaurantService {
         try {
             return restaurantDataMapper.selectAll();
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to get all restaurants: " + e.getMessage() );
         }
 
         return List.of();
@@ -81,7 +82,7 @@ public class RestaurantService {
         try {
             return restaurantDataMapper.insert(restaurant);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to add a restaurant: " + e.getMessage() );
         }
 
         return false;
@@ -92,7 +93,7 @@ public class RestaurantService {
         try {
             return restaurantDataMapper.update(restaurant);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to modify a restaurant: " + e.getMessage() );
         }
 
         return false;
@@ -103,7 +104,7 @@ public class RestaurantService {
         try {
             return restaurantDataMapper.delete(restaurant);
         } catch (SQLException e) {
-            e.printStackTrace();
+            SimpleLogger.error("An error occured while trying to remove a restaurant: " + e.getMessage() );
         }
 
         return false;

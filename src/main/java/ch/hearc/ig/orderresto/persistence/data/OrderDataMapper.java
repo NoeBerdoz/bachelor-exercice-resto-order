@@ -52,7 +52,7 @@ public class OrderDataMapper implements DataMapper<Order> {
                 if (generatedKeys.next()) {
                     String generatedId = generatedKeys.getString(1);
                     order.setId(Long.valueOf(generatedId));
-                    SimpleLogger.info("[INSERTED] ORDER WITH ID: " + order.getId());
+                    SimpleLogger.info("[DB][INSERTED] ORDER ID: " + order.getId());
 
                     cacheProvider.cache.put(order.getId(), order);
 
@@ -91,14 +91,14 @@ public class OrderDataMapper implements DataMapper<Order> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[UPDATED] ORDER WITH ID: " + order.getId());
+                SimpleLogger.info("[DB][UPDATED] ORDER ID: " + order.getId());
 
                 cacheProvider.cache.put(order.getId(), order);
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[UPDATED] NO ORDER TO UPDATE WITH ID: " + order.getId());
+                SimpleLogger.warning("[DB][UPDATE] NO ORDER FOUND WITH ID: " + order.getId());
             }
 
         } catch (SQLException e) {
@@ -127,14 +127,14 @@ public class OrderDataMapper implements DataMapper<Order> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows > 0) {
-                SimpleLogger.info("[DELETED] ORDER WITH ID: " + order.getId());
+                SimpleLogger.info("[DB][DELETED] ORDER ID: " + order.getId());
 
                 cacheProvider.cache.remove(order.getId());
 
                 connection.commit();
                 return true;
             } else {
-                SimpleLogger.warning("[DELETED] NO ORDER TO DELETE WITH ID: " + order.getId());
+                SimpleLogger.warning("[DB][DELETE] NO ORDER FOUND WITH ID: " + order.getId());
             }
 
         } catch (SQLException e) {
@@ -152,7 +152,7 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         // Check the cache first
         if (cacheProvider.cache.containsKey(id)) {
-            SimpleLogger.info("[CACHE] Selected ORDER with ID: " + id);
+            SimpleLogger.info("[CACHE][SELECTED] ORDER ID: " + id);
             return Optional.of(cacheProvider.cache.get(id));
         }
 
@@ -172,7 +172,7 @@ public class OrderDataMapper implements DataMapper<Order> {
 
                 cacheProvider.cache.put(order.getId(), order);
 
-                SimpleLogger.info("[SELECTED] ORDER with ID: " + id);
+                SimpleLogger.info("[DB][SELECTED] ORDER ID: " + id);
                 return Optional.of(order);
             }
 
@@ -189,7 +189,7 @@ public class OrderDataMapper implements DataMapper<Order> {
 
         // Check the cache first
         if (cacheProvider.isCacheValid()){
-            SimpleLogger.info("[CACHE] Selected all ORDER" );
+            SimpleLogger.info("[CACHE][SELECTED] ALL ORDER" );
             return new ArrayList<>(cacheProvider.cache.values());
         }
 
@@ -202,19 +202,16 @@ public class OrderDataMapper implements DataMapper<Order> {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countOrder = 0;
             while (resultSet.next()) {
                 Order order = mapToObject(resultSet);
                 orders.add(order);
 
                 cacheProvider.cache.put(order.getId(), order);
-
-                countOrder++;
             }
 
             cacheProvider.setCacheValid();
 
-            SimpleLogger.info("[SELECTED] ORDER COUNT: " + countOrder);
+            SimpleLogger.info("[DB][SELECTED] ALL ORDER");
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching all orders: " + e.getMessage());
@@ -230,7 +227,7 @@ public class OrderDataMapper implements DataMapper<Order> {
         if (!ProductOrderMapper.cacheProvider.isCacheValid()) {
             ProductOrderMapper.getInstance().selectAll();
         } else {
-            SimpleLogger.info("[CACHE] Selected ORDER WHERE ORDER RESTAURANT ID: " + restaurantId);
+            SimpleLogger.info("[CACHE][SELECTED] ORDER WHERE RESTAURANT ID: " + restaurantId);
             return RestaurantDataMapper.cacheProvider.cache.get(restaurantId).getOrders();
         }
 
@@ -246,16 +243,13 @@ public class OrderDataMapper implements DataMapper<Order> {
 
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countOrder = 0;
             while (resultSet.next()) {
                 Order order = mapToObject(resultSet);
                 orders.add(order);
 
                 cacheProvider.cache.put(order.getId(), order);
-
-                countOrder++;
             }
-            SimpleLogger.info("[SELECTED] RESTAURANT ORDER COUNT: " + countOrder);
+            SimpleLogger.info("[DB][SELECTED] ORDER WHERE RESTAURANT ID: " + restaurantId);
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching orders by restaurant ID: " + e.getMessage());
@@ -271,7 +265,7 @@ public class OrderDataMapper implements DataMapper<Order> {
         if (!ProductOrderMapper.cacheProvider.isCacheValid()) {
             ProductOrderMapper.getInstance().selectAll();
         } else {
-            SimpleLogger.info("[CACHE] Selected ORDER WHERE ORDER CUSTOMER ID: " + customerId);
+            SimpleLogger.info("[CACHE][SELECTED] ORDER WHERE CUSTOMER ID: " + customerId);
             return CustomerDataMapper.cacheProvider.cache.get(customerId).getOrders();
         }
 
@@ -287,16 +281,13 @@ public class OrderDataMapper implements DataMapper<Order> {
 
             ResultSet resultSet = statement.executeQuery();
 
-            Integer countOrder = 0;
             while (resultSet.next()) {
                 Order order = mapToObject(resultSet);
                 orders.add(order);
 
                 cacheProvider.cache.put(order.getId(), order);
-
-                countOrder++;
             }
-            SimpleLogger.info("[SELECTED] CUSTOMER ORDER COUNT: " + countOrder);
+            SimpleLogger.info("[DB][SELECTED] ORDER WHERE CUSTOMER ID: " + customerId);
 
         } catch (SQLException e) {
             SimpleLogger.error("Error while fetching orders by customer ID: " + e.getMessage());
