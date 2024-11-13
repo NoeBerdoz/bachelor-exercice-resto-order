@@ -38,15 +38,12 @@ My implementation is not perfect, but it doesn't do circular reference.
 **When searching for a restaurant in the Data Mapper, what should be fetched? Should it be only the restaurant, its orders, or something else? Where do we stop?**
 
 I used a lazy loading pattern. When searching for a restaurant, only the restaurant data is retrieved initially. 
-Additional related data, such as orders, is only loaded when explicitly requested, minimizing unnecessary database queries and improving performance.
+Additional related data, such as orders, is only loaded when requested.
 
 **How are relations between the different Data Mappers managed?**
 
 I tried to follow SOLID principles and keep the Data Mappers independent of each other. 
 However, in some cases, relations between different Data Mappers are implemented to maintain the cache.
-
-And in my implementation, the ProductOrderMapper breaks this principle
-The different Data Mappers are loosely coupled. They interact primarily through their caches and use each other’s data to maintain consistency. This ensures that objects like `Order` and `Product` are properly associated with the `Restaurant`, and their respective data is synchronized via the cache.
 
 **How many interactions with the database are made by my code?**
 
@@ -57,7 +54,7 @@ The cache is made in a way to always be consistent with every INSERT, UPDATE, DE
 
 I implemented a `SimpleLogger` to see easily while using the CLI when a query is made in the database (The logger will output a "[DB][INSTRUCTION])  and when the data comes from the cache (The logger will output a "[CACHE][INSTRUCTION]).
 
-As the cache is implemented following the Identity Map pattern, there is no duplicate objects, and with my cache validity approach, the data doesn't need to be fetched again once it has been fetched from the database.
+As the cache is implemented following the [Identity Map](https://martinfowler.com/eaaCatalog/identityMap.html) pattern, there is no duplicate objects, and with my cache validity approach, the data doesn't need to be fetched again once it has been fetched from the database.
 
 ## Setup
 
@@ -73,6 +70,8 @@ Make sure to replace the placeholders with your actual database details.
 
 Make sure to install the dependencies present in `pom.xml`.
 
+This project was made using Java 21.
+
 ## Possible Improvements
 
 - **Make the DataMappers independant of each others**: In my current implementation, the ProductOrderMapper breaks this principle, but it could be fixed by doing 2 changes: 
@@ -81,9 +80,9 @@ Make sure to install the dependencies present in `pom.xml`.
 
 - **Multi-threading**: My implementation is not multi-threading friendly, each singleton is lazy-loaded instead of eagerly fetched, which is not multi-thread safe. (However, this approach is more optimized for a single-threaded environment). And many other things would need to be change in their implementation like the connection pooling possibility, the cache management etc...
 
-- **Cache Management**: The cache implementation is far from perfect. And if other processes (besides this application) update the data in the database, the cache will not automatically update. Improvements could be made to synchronize the cache with the database more effectively.
+- **Cache Management**: The cache implementation is far from perfect. And if other processes (besides this application) update the data in the database, the cache will not be automatically update. Improvements could be made to synchronize the cache with the database more effectively.
 
-- **Unused code**: I have implemented many unused method in the project to handle the CRUD operations of each entity. It is now possible to adapt the CLI and uses the methods in the services to add more operation to each entity. (Like adding restaurant, deleting a product, etc...)
+- **Unused code**: I have implemented many unused method in the project that handle the CRUD operations of each entity. It is now possible to adapt the CLI and use the methods in the services to add more operations to each entity. (Like adding restaurant, deleting a product, etc...)
 
 ## Known issue
 There is an issue with the management of the order prices and product prices.
