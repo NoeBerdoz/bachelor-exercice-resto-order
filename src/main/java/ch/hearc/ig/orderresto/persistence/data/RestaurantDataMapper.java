@@ -57,10 +57,10 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
                     cacheProvider.cache.put(restaurant.getId(), restaurant);
 
+                    connection.commit();
                     return true;
                 }
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -68,6 +68,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -98,11 +99,11 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
                 cacheProvider.cache.put(restaurant.getId(), restaurant);
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[UPDATED] NO RESTAURANT TO UPDATE WITH ID: " + restaurant.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -110,6 +111,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -134,11 +136,11 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
                 cacheProvider.cache.remove(restaurant.getId());
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[DELETED] NO RESTAURANT FOUND WITH ID: " + restaurant.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -146,6 +148,7 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 

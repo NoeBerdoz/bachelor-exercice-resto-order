@@ -57,10 +57,10 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                     cacheProvider.cache.put(product.getId(), product);
 
+                    connection.commit();
                     return true;
                 }
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -68,6 +68,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -96,11 +97,11 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                 cacheProvider.cache.put(product.getId(), product);
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[UPDATED] NO PRODUCT TO UPDATE WITH ID: " + product.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -108,6 +109,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -130,11 +132,11 @@ public class ProductDataMapper implements DataMapper<Product> {
 
                 cacheProvider.cache.remove(product.getId());
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[DELETED] NO PRODUCT FOUND WITH ID: " + product.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -142,6 +144,7 @@ public class ProductDataMapper implements DataMapper<Product> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 

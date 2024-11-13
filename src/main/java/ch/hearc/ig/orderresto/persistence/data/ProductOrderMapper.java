@@ -127,7 +127,6 @@ public class ProductOrderMapper {
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
-
             StatementHelper.bindStatementParameters(
                     statement,
                     product.getId(),
@@ -150,15 +149,19 @@ public class ProductOrderMapper {
                         .getProducts().add(product); // Add product to the order's products
 
                 SimpleLogger.info("[INSERTED] PRODUCT ORDER RELATION with PRODUCT ID: " + product.getId() + " and ORDER ID: " + product.getId());
-            }
-            connection.commit();
 
-            return true;
+                connection.commit();
+                return true;
+            }
+
         } catch (SQLException e) {
             connection.rollback();
             SimpleLogger.error("Error while inserting product order relation: " + e.getMessage());
             throw e;
         }
+
+        connection.commit();
+        return false;
     }
 
     public boolean deleteProductOrderRelation(Long orderId) throws SQLException {
@@ -179,11 +182,12 @@ public class ProductOrderMapper {
             if (affectedRows > 0) {
                 cacheProvider.cache.remove(orderId);
                 SimpleLogger.info("[DELETED] PRODUCT ORDER RELATION with ORDER ID: " + orderId);
+
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.info("[DELETED] NO ORDER FOUND IN PRODUCT ORDER RELATION with ORDER ID: " + orderId);
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -191,6 +195,7 @@ public class ProductOrderMapper {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 }

@@ -56,10 +56,10 @@ public class OrderDataMapper implements DataMapper<Order> {
 
                     cacheProvider.cache.put(order.getId(), order);
 
+                    connection.commit();
                     return true;
                 }
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -67,6 +67,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -94,11 +95,11 @@ public class OrderDataMapper implements DataMapper<Order> {
 
                 cacheProvider.cache.put(order.getId(), order);
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[UPDATED] NO ORDER TO UPDATE WITH ID: " + order.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -106,6 +107,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -129,11 +131,11 @@ public class OrderDataMapper implements DataMapper<Order> {
 
                 cacheProvider.cache.remove(order.getId());
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[DELETED] NO ORDER TO DELETE WITH ID: " + order.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -141,6 +143,7 @@ public class OrderDataMapper implements DataMapper<Order> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 

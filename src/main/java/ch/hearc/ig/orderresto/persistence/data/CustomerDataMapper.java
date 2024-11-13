@@ -68,10 +68,10 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
                     cacheProvider.cache.put(customer.getId(), customer);
 
+                    connection.commit();
                     return true;
                 }
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -79,6 +79,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -114,11 +115,11 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
                 cacheProvider.cache.put(customer.getId(), customer);
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.error("[UPDATED] NO CUSTOMER TO UPDATE WITH ID: " + customer.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -126,6 +127,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
@@ -149,11 +151,11 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
                 cacheProvider.cache.remove(customer.getId());
 
+                connection.commit();
                 return true;
             } else {
                 SimpleLogger.warning("[DELETED] NO CUSTOMER TO DELETE WITH ID: " + customer.getId());
             }
-            connection.commit();
 
         } catch (SQLException e) {
             connection.rollback();
@@ -161,6 +163,7 @@ public class CustomerDataMapper implements DataMapper<Customer> {
             throw e;
         }
 
+        connection.commit();
         return false;
     }
 
