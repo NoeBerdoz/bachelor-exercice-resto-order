@@ -37,8 +37,6 @@ public class ProductOrderMapper {
 
         Connection connection = DatabaseConnection.getConnection();
 
-        List<Product> products = new ArrayList<>();
-
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
@@ -47,7 +45,6 @@ public class ProductOrderMapper {
                 Long orderId = resultSet.getLong("FK_COMMANDE");
 
                 Product product = ProductDataMapper.getInstance().mapToObject(resultSet);
-                products.add(product);
 
                 cacheProvider.cache
                         .computeIfAbsent(orderId, k -> new HashSet<>()) // Adds an empty HashSet with orderId as key if not present
