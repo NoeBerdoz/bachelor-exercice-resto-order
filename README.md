@@ -50,7 +50,14 @@ The different Data Mappers are loosely coupled. They interact primarily through 
 
 **How many interactions with the database are made by my code?**
 
-The number of interactions with the database is minimized. I have implemented a cache and used the Identity Map pattern to ensure that data is fetched from the database only when it is not already present in the cache. This reduces unnecessary database queries and improves performance by reusing objects already loaded into memory.
+The number of interactions with the database is minimized. I have implemented a cache and used the Identity Map pattern to ensure that data is fetched from the database only when it is not already present in the cache.
+
+When launching the application, and getting for the first time a data that concerns a table, a `selectAll()` operation will load the entire table in the cache, and then the application will get the concerning data only from the cache.
+The cache is made in a way to always be consistent with every INSERT, UPDATE, DELETE method made on the database through a DataMapper.
+
+I implemented a `SimpleLogger` to see easily while using the CLI when a query is made in the database (The logger will output a "[DB][INSTRUCTION])  and when the data comes from the cache (The logger will output a "[CACHE][INSTRUCTION]).
+
+As the cache is implemented following the Identity Map pattern, there is no duplicate objects, and with my cache validity approach, the data doesn't need to be fetched again once it has been fetched from the database.
 
 ## Setup
 
