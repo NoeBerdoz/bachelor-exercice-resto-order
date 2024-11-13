@@ -83,6 +83,13 @@ Make sure to install the dependencies present in `pom.xml`.
 
 - **Cache Management**: The cache implementation is far from perfect. And if other processes (besides this application) update the data in the database, the cache will not automatically update. Improvements could be made to synchronize the cache with the database more effectively.
 
+- **Unused code**: I have implemented many unused method in the project to handle the CRUD operations of each entity. It is now possible to adapt the CLI and uses the methods in the services to add more operation to each entity. (Like adding restaurant, deleting a product, etc...)
+
+## Known issue
+There is an issue with the management of the order prices and product prices.
+When checking an order after its creation in another execution, the order and product price are 0.00
+It is related to the cache management, but I'm out of time to fix it.
+
 ## Conclusion
 
 This exercise made me realize the complexity of managing Java objects with relational database data.
