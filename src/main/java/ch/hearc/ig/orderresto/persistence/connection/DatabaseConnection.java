@@ -6,8 +6,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Manages a single database connection for the application.
+ * Uses a Singleton pattern to ensure only one connection is active.
+ */
 public class DatabaseConnection {
 
+    // Loads database properties from a configuration file.
     private static PropertiesLoader propertiesLoader = new PropertiesLoader("database.properties");
 
     private static final String DB_URL = propertiesLoader.getProperty("db.url");
@@ -16,7 +21,13 @@ public class DatabaseConnection {
 
     private static Connection connection;
 
-    // Singleton database connection, creates it if necessary.
+    /**
+     * Returns the active database connection, creating if it does not exist.
+     * Sets the connection to not auto-commit to support manual transaction control.
+     *
+     * @return the active database connection
+     * @throws SQLException if connection fails
+     */
     public static Connection getConnection() throws SQLException {
         if (connection == null) {
             try {
@@ -31,6 +42,11 @@ public class DatabaseConnection {
         return connection;
     }
 
+    /**
+     * Closes the current database connection, if it exists, and logs the closure.
+     *
+     * @throws SQLException if closing the connection fails
+     */
     public static void closeConnection() throws SQLException {
         if (connection != null) {
             try {

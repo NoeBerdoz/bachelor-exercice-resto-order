@@ -15,7 +15,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-
+/**
+ * DataMapper implementation for managing Customer entities in the database.
+ * Provides CRUD operations and caching for customers.
+ * It handles the logic of the Customer entity and its subclasses PrivateCustomer and OrganizationCustomer.
+ */
 public class CustomerDataMapper implements DataMapper<Customer> {
 
     private static CustomerDataMapper instance;
@@ -31,6 +35,13 @@ public class CustomerDataMapper implements DataMapper<Customer> {
 
     public static final CacheProvider<Long, Customer> cacheProvider = new CacheProvider<>();
 
+    /**
+     * Inserts a new customer into the database.
+     *
+     * @param customer The customer to insert.
+     * @return true if the insertion was successful, false otherwise.
+     * @throws SQLException If an SQL error occurs during insertion.
+     */
     @Override
     public boolean insert(Customer customer) throws SQLException {
 
@@ -83,6 +94,13 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return false;
     }
 
+    /**
+     * Updates an existing customer in the database.
+     *
+     * @param customer The customer to update.
+     * @return true if the update was successful, false otherwise.
+     * @throws SQLException If an SQL error occurs during the update.
+     */
     @Override
     public boolean update(Customer customer) throws SQLException {
 
@@ -131,6 +149,13 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return false;
     }
 
+    /**
+     * Deletes a customer from the database.
+     *
+     * @param customer The customer to delete.
+     * @return true if the deletion was successful, false otherwise.
+     * @throws SQLException If an SQL error occurs during deletion.
+     */
     @Override
     public boolean delete(Customer customer) throws SQLException {
 
@@ -167,6 +192,13 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return false;
     }
 
+    /**
+     * Selects a customer by its ID from the database or cache.
+     *
+     * @param id The ID of the customer to retrieve.
+     * @return An Optional containing the customer if found, empty otherwise.
+     * @throws SQLException If an SQL error occurs during the selection.
+     */
     @Override
     public Optional<Customer> selectById(Long id) throws SQLException {
 
@@ -202,6 +234,12 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return Optional.empty();
     }
 
+    /**
+     * Selects all customers from the database or cache.
+     *
+     * @return A list of all customers.
+     * @throws SQLException If an SQL error occurs during the selection.
+     */
     @Override
     public List<Customer> selectAll() throws SQLException {
 
@@ -239,6 +277,14 @@ public class CustomerDataMapper implements DataMapper<Customer> {
         return customers;
     }
 
+    /**
+     * Maps a ResultSet to a Customer object.
+     * Depending on the customer type, returns a corresponding Customer Object
+     *
+     * @param resultSet The ResultSet to map.
+     * @return A Customer object corresponding to the ResultSet.
+     * @throws SQLException If an SQL error occurs during mapping.
+     */
     @Override
     public Customer mapToObject(ResultSet resultSet) throws SQLException {
 

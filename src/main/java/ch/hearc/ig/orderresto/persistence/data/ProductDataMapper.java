@@ -12,6 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * DataMapper implementation for managing Product entities in the database.
+ * Provides CRUD operations and caching for products.
+ */
 public class ProductDataMapper implements DataMapper<Product> {
 
     private static ProductDataMapper instance;
@@ -27,7 +31,13 @@ public class ProductDataMapper implements DataMapper<Product> {
 
     public static final CacheProvider<Long, Product> cacheProvider = new CacheProvider<>();
 
-    // Insert a Product to the database.
+    /**
+     * Inserts a product into the database.
+     *
+     * @param product the product to insert.
+     * @return true if insertion is successful, false otherwise.
+     * @throws SQLException if a database error occurs.
+     */
     @Override
     public boolean insert(Product product) throws SQLException {
 
@@ -72,7 +82,13 @@ public class ProductDataMapper implements DataMapper<Product> {
         return false;
     }
 
-    // Update a Product in the database based on its id.
+    /**
+     * Updates a product in the database.
+     *
+     * @param product the product to update.
+     * @return true if update is successful, false otherwise.
+     * @throws SQLException if a database error occurs.
+     */
     @Override
     public boolean update(Product product) throws SQLException {
 
@@ -113,7 +129,13 @@ public class ProductDataMapper implements DataMapper<Product> {
         return false;
     }
 
-    // Delete a Product in the database based on its id
+    /**
+     * Deletes a product from the database.
+     *
+     * @param product the product to delete.
+     * @return true if deletion is successful, false otherwise.
+     * @throws SQLException if a database error occurs.
+     */
     @Override
     public boolean delete(Product product) throws SQLException {
 
@@ -148,7 +170,13 @@ public class ProductDataMapper implements DataMapper<Product> {
         return false;
     }
 
-    // Retrieve a Product by its ID.
+    /**
+     * Retrieves a product by its ID.
+     *
+     * @param id the ID of the product to retrieve.
+     * @return an Optional containing the product if found, empty otherwise.
+     * @throws SQLException if a database error occurs.
+     */
     @Override
     public Optional<Product> selectById(Long id) throws SQLException {
 
@@ -186,7 +214,12 @@ public class ProductDataMapper implements DataMapper<Product> {
 
     }
 
-    // Retrieves all Products from the database.
+    /**
+     * Retrieves all products from the database. Set the cache validity to true once fetched from the database.
+     *
+     * @return a list of all products.
+     * @throws SQLException if a database error occurs.
+     */
     @Override
     public List<Product> selectAll() throws SQLException {
 
@@ -224,6 +257,13 @@ public class ProductDataMapper implements DataMapper<Product> {
         return products;
     }
 
+    /**
+     * Retrieves products associated with a specific restaurant ID.
+     *
+     * @param restaurantId the restaurant ID.
+     * @return a set of products related to the specified restaurant.
+     * @throws SQLException if a database error occurs.
+     */
     public Set<Product> selectWhereRestaurantId(Long restaurantId) throws SQLException {
 
         Set<Product> products = new HashSet<>();
@@ -272,6 +312,13 @@ public class ProductDataMapper implements DataMapper<Product> {
         return products;
     }
 
+    /**
+     * Maps a ResultSet to a Product object.
+     *
+     * @param resultSet the ResultSet to map.
+     * @return the mapped Product object.
+     * @throws SQLException if a database error occurs.
+     */
     @Override
     public Product mapToObject(ResultSet resultSet) throws SQLException {
 

@@ -10,6 +10,10 @@ import ch.hearc.ig.orderresto.utils.SimpleLogger;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * DataMapper implementation for managing Restaurant entities in the database.
+ * Provides CRUD operations and caching for restaurants.
+ */
 public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     private static RestaurantDataMapper instance;
@@ -25,7 +29,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     public static final CacheProvider<Long, Restaurant> cacheProvider = new CacheProvider<>();
 
-    // Insert a Restaurant to the database.
+    /**
+     * Inserts a new restaurant into the database.
+     *
+     * @param restaurant the restaurant to insert
+     * @return true if the restaurant was successfully inserted, false otherwise
+     * @throws SQLException if a database error occurs
+     */
     @Override
     public boolean insert(Restaurant restaurant) throws SQLException {
 
@@ -72,7 +82,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         return false;
     }
 
-    // Update a Restaurant in the database based on its id.
+    /**
+     * Updates an existing restaurant in the database.
+     *
+     * @param restaurant the restaurant to update
+     * @return true if the restaurant was successfully updated, false otherwise
+     * @throws SQLException if a database error occurs
+     */
     @Override
     public boolean update(Restaurant restaurant) throws SQLException {
 
@@ -115,7 +131,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         return false;
     }
 
-    // Delete a Restaurant in the database based on its id
+    /**
+     * Deletes a restaurant from the database.
+     *
+     * @param restaurant the restaurant to delete
+     * @return true if the restaurant was successfully deleted, false otherwise
+     * @throws SQLException if a database error occurs
+     */
     @Override
     public boolean delete(Restaurant restaurant) throws SQLException {
 
@@ -152,7 +174,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         return false;
     }
 
-    // Retrieve a Restaurant by its ID.
+    /**
+     * Retrieves a restaurant by its ID.
+     *
+     * @param id the ID of the restaurant to retrieve in the database
+     * @return an Optional containing the restaurant if found, or an empty Optional if not found
+     * @throws SQLException if a database error occurs
+     */
     @Override
     public Optional<Restaurant> selectById(Long id) throws SQLException {
 
@@ -190,7 +218,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
 
     }
 
-    // Retrieves all restaurants from the database.
+    /**
+     * Retrieves all restaurants from the database.
+     * Set the cache valid once the data is fetched from the database.
+     *
+     * @return a list of all restaurants
+     * @throws SQLException if a database error occurs
+     */
     @Override
     public List<Restaurant> selectAll() throws SQLException {
 
@@ -228,7 +262,13 @@ public class RestaurantDataMapper implements DataMapper<Restaurant> {
         return restaurants;
     }
 
-    // Map an SQL ResultSet to a Restaurant Java object.
+    /**
+     * Maps a SQL ResultSet to a Restaurant object.
+     *
+     * @param resultSet the result set to map
+     * @return the mapped Restaurant object
+     * @throws SQLException if a database error occurs
+     */
     public Restaurant mapToObject(ResultSet resultSet) throws SQLException {
 
         Address address = new Address(

@@ -11,6 +11,10 @@ import java.sql.Connection;import java.sql.PreparedStatement;import java.sql.Res
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Mapper for handling Product-Order relationships in the database.
+ * Provides methods to select, insert, and delete product-order relations.
+ */
 public class ProductOrderMapper {
 
     private static ProductOrderMapper instance;
@@ -27,6 +31,11 @@ public class ProductOrderMapper {
     // store each orders as id and their products
     public static final CacheProvider<Long, Set<Product>> cacheProvider = new CacheProvider<>();
 
+    /**
+     * Selects all product-order relations from the database and caches them.
+     *
+     * @throws SQLException if a database access error occurs
+     */
     public void selectAll() throws SQLException {
 
         String sql = "SELECT FK_COMMANDE, PRODUIT.NUMERO, PRODUIT.FK_RESTO, PRODUIT.PRIX_UNITAIRE, PRODUIT.NOM, PRODUIT.DESCRIPTION FROM PRODUIT_COMMANDE " +
@@ -58,7 +67,14 @@ public class ProductOrderMapper {
         }
     }
 
-    // TODO write java doc
+    /**
+     * Selects all products associated with a specific order from the database.
+     * Utilizes cache if available.
+     *
+     * @param order the order to fetch products for
+     * @return a set of products for the given order
+     * @throws SQLException if a database access error occurs
+     */
     public Set<Product> selectProductsWhereOrder(Order order) throws SQLException {
 
         // Check the cache first
@@ -112,6 +128,15 @@ public class ProductOrderMapper {
         return products;
     }
 
+    /**
+     * Inserts a product-order relationship into the database.
+     * Updates caches accordingly.
+     *
+     * @param product the product to associate with the order
+     * @param order the order to associate with the product
+     * @return true if insertion was successful, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public boolean insertProductOrderRelation(Product product, Order order) throws SQLException {
 
         String sql = "INSERT INTO PRODUIT_COMMANDE (FK_PRODUIT, FK_COMMANDE) VALUES (?,?)";
@@ -157,6 +182,13 @@ public class ProductOrderMapper {
         return false;
     }
 
+    /**
+     * Deletes a product-order relationship from the database based on order ID.
+     *
+     * @param orderId the ID of the order whose product order relation is to be deleted
+     * @return true if deletion was successful, false otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public boolean deleteProductOrderRelation(Long orderId) throws SQLException {
 
         String sql = "DELETE FROM PRODUIT_COMMANDE WHERE FK_COMMANDE = ?";

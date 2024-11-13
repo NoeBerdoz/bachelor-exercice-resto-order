@@ -12,6 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * DataMapper implementation for managing Order entities in the database.
+ * Provides CRUD operations and caching for orders.
+ */
 public class OrderDataMapper implements DataMapper<Order> {
 
     private static OrderDataMapper instance;
@@ -27,6 +31,13 @@ public class OrderDataMapper implements DataMapper<Order> {
 
     public static final CacheProvider<Long, Order> cacheProvider = new CacheProvider<>();
 
+    /**
+     * Inserts a new order into the database.
+     *
+     * @param order The order to be inserted.
+     * @return true if the order was successfully inserted, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
     @Override
     public boolean insert(Order order) throws SQLException {
 
@@ -71,6 +82,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return false;
     }
 
+    /**
+     * Updates an existing order in the database.
+     *
+     * @param order The order to be updated.
+     * @return true if the order was successfully updated, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
     @Override
     public boolean update(Order order) throws SQLException {
 
@@ -111,6 +129,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return false;
     }
 
+    /**
+     * Deletes an order from the database.
+     *
+     * @param order The order to be deleted.
+     * @return true if the order was successfully deleted, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
     @Override
     public boolean delete(Order order) throws SQLException {
 
@@ -147,6 +172,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return false;
     }
 
+    /**
+     * Selects an order by its ID.
+     *
+     * @param id The ID of the order to be selected.
+     * @return an Optional containing the order if found, otherwise an empty Optional.
+     * @throws SQLException if a database access error occurs.
+     */
     @Override
     public Optional<Order> selectById(Long id) throws SQLException {
 
@@ -184,6 +216,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return Optional.empty();
     }
 
+    /**
+     * Selects all orders from the database or from the cache when it is valid.
+     * Set the cache valid once the data is fetched from the database.
+     *
+     * @return a list of all orders.
+     * @throws SQLException if a database access error occurs.
+     */
     @Override
     public List<Order> selectAll() throws SQLException {
 
@@ -221,6 +260,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return orders;
     }
 
+    /**
+     * Selects orders by restaurant ID.
+     *
+     * @param restaurantId The restaurant ID used to filter the orders.
+     * @return a set of orders for the given restaurant ID.
+     * @throws SQLException if a database access error occurs.
+     */
     public Set<Order> selectWhereRestaurantId(Long restaurantId) throws SQLException {
 
         // Check the cache first, fill it if it is invalid
@@ -259,6 +305,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return orders;
     }
 
+    /**
+     * Selects orders by customer ID.
+     *
+     * @param customerId The customer ID used to filter the orders.
+     * @return a set of orders for the given customer ID.
+     * @throws SQLException if a database access error occurs.
+     */
     public Set<Order> selectWhereCustomerId(Long customerId) throws SQLException {
 
         // Check the cache first, fill it if it is invalid
@@ -297,6 +350,13 @@ public class OrderDataMapper implements DataMapper<Order> {
         return orders;
     }
 
+    /**
+     * Maps a ResultSet to an Order object.
+     *
+     * @param resultSet The ResultSet containing the order data.
+     * @return the mapped Order object.
+     * @throws SQLException if a database access error occurs.
+     */
     @Override
     public Order mapToObject(ResultSet resultSet) throws SQLException {
         return new Order.Builder()

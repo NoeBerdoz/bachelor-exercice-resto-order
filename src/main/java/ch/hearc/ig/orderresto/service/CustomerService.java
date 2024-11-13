@@ -13,6 +13,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Service class that provides methods for managing customers, including retrieving, adding, modifying,
+ * and deleting customer records. It interacts with the data access layer (mappers) to perform operations
+ * related to customers and their associated orders.
+ */
 public class CustomerService {
 
     private static CustomerService instance;
@@ -28,6 +33,12 @@ public class CustomerService {
     private final CustomerDataMapper customerDataMapper = CustomerDataMapper.getInstance();
     private final OrderDataMapper orderDataMapper = OrderDataMapper.getInstance();
 
+    /**
+     * Retrieves all orders for a given customer, including product details for each order.
+     *
+     * @param customer the customer whose orders are to be retrieved.
+     * @return a set of orders associated with the given customer, or null if an error occurs.
+     */
     public Set<Order> getOrdersFromCustomer(Customer customer) {
         Set<Order> orders = null;
 
@@ -47,6 +58,13 @@ public class CustomerService {
         return orders;
     }
 
+    /**
+     * Adds a new customer to the system. If the customer is a PrivateCustomer, the gender is converted
+     * from the application representation ("F" or "H") to the database representation ("O" or "N").
+     *
+     * @param customer the customer to be added.
+     * @return true if the customer was successfully added, false otherwise.
+     */
     public boolean addCustomer(Customer customer) {
         try {
             // Manage the already present technical debt given with the exercise
@@ -66,6 +84,12 @@ public class CustomerService {
         return false;
     }
 
+    /**
+     * Modifies the details of an existing customer.
+     *
+     * @param customer the customer to be modified.
+     * @return true if the customer was successfully modified, false otherwise.
+     */
     public boolean modifyCustomer(Customer customer) {
 
         try {
@@ -77,6 +101,12 @@ public class CustomerService {
         return false;
     }
 
+    /**
+     * Removes a customer from the system.
+     *
+     * @param customer the customer to be removed.
+     * @return true if the customer was successfully removed, false otherwise.
+     */
     public boolean removeCustomer(Customer customer) {
 
         try {
@@ -88,6 +118,12 @@ public class CustomerService {
         return false;
     }
 
+    /**
+     * Retrieves a customer by their unique ID.
+     *
+     * @param id the ID of the customer to be retrieved.
+     * @return an Optional containing the customer if found, or an empty Optional if not found.
+     */
     public Optional<Customer> getCustomerById(Long id) {
 
         try {
@@ -99,6 +135,12 @@ public class CustomerService {
         return Optional.empty();
     }
 
+
+    /**
+     * Retrieves a list of all customers in the system.
+     *
+     * @return a list of all customers, or an empty list if an error occurs.
+     */
     public List<Customer> getAllCustomers() {
 
         try {

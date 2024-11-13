@@ -6,9 +6,20 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Helper class for binding parameters to SQL prepared statements.
+ * This class handles various data types and their specific binding to SQL queries.
+ */
 public class StatementHelper {
 
-    // Bind parameters to a prepared statement.
+    /**
+     * Binds the given parameters to a prepared statement.
+     * This method dynamically binds multiple parameters of various types
+     * to a prepared statement in the correct format.
+     *
+     * @param statement the prepared statement to bind parameters to
+     * @param sqlParameters the parameters to bind, in the order they appear in the SQL query
+     */
     public static void bindStatementParameters(PreparedStatement statement, Object... sqlParameters) {
         for (int i = 0; i < sqlParameters.length; i++) {
             Object parameter = sqlParameters[i];
