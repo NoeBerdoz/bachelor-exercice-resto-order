@@ -1,17 +1,38 @@
 package ch.hearc.ig.orderresto.business;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
+@Table(
+        name = "PRODUIT"
+)
 public class Product {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @Column(name = "NOM", nullable = false)
     private String name;
+
+    @Column(name = "PRIX_UNITAIRE", nullable = false)
     private BigDecimal unitPrice;
+
+    @Column(name = "DESCRIPTION", nullable = false)
     private String description;
+
+   @ManyToMany(mappedBy = "products")
     private Set<Order> orders;
+
+    @ManyToOne
+    @JoinColumn(name = "FK_RESTO", nullable = false)
     private Restaurant restaurant;
+
+    public Product() {}
 
     public Product(Long id, String name, BigDecimal unitPrice, String description, Restaurant restaurant) {
         this.id = id;

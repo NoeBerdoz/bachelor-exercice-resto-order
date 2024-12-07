@@ -19,6 +19,8 @@ public class DatabaseConnection {
     private static final String DB_USER = propertiesLoader.getProperty("db.user");
     private static final String DB_PASSWORD = propertiesLoader.getProperty("db.password");
 
+    public static final String DB_DEFAULT_SCHEMA = propertiesLoader.getProperty("db.default.schema");
+
     private static Connection connection;
 
     /**

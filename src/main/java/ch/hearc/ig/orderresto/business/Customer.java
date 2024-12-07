@@ -1,15 +1,33 @@
 package ch.hearc.ig.orderresto.business;
 
+import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
+@Table(
+        name = "CLIENT"
+)
 public abstract class Customer {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @Column(name = "TELEPHONE", nullable = false)
     private String phone;
+
+    @Column(name = "EMAIL", nullable = false)
     private String email;
+
+    @OneToMany(mappedBy="customer")
     private Set<Order> orders;
+
+    @Embedded
     private Address address;
+
+    public Customer() {}
 
     protected Customer(Long id, String phone, String email, Address address) {
         this.id = id;

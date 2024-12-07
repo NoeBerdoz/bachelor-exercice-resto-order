@@ -1,19 +1,49 @@
 package ch.hearc.ig.orderresto.business;
 
+import ch.hearc.ig.orderresto.persistence.helper.BooleanConverter;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
+@Table(
+        name = "COMMANDE"
+)
 public class Order {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "FK_CLIENT", nullable = false)
     private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "FK_RESTO", nullable = false)
     private Restaurant restaurant;
+
+    @ManyToMany
+    @JoinTable(
+            name = "PRODUIT_COMMANDE",
+            joinColumns = @JoinColumn(name = "FK_COMMANDE"),
+            inverseJoinColumns = @JoinColumn(name = "FK_PRODUIT")
+    )
     private Set<Product> products;
+
+    @Convert(converter = BooleanConverter.class)
     private Boolean takeAway;
+
+    // Since Java 8, the new Java Date and Time API is available for dealing with temporal values.
+    @Column(name = "QUAND", nullable = false)
     private LocalDateTime when;
+
     private BigDecimal totalAmount;
+
+    public Order() {}
 
     public Order(Long id, Customer customer, Restaurant restaurant, Boolean takeAway, LocalDateTime when) {
         this.id = id;

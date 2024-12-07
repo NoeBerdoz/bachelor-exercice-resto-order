@@ -1,15 +1,33 @@
 package ch.hearc.ig.orderresto.business;
 
+import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
+@Table(
+        name = "RESTAURANT"
+)
 public class Restaurant {
 
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @Column(name="NOM", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy="restaurant")
     private Set<Order> orders;
+
+    @Embedded
     private Address address;
+
+    @OneToMany(mappedBy = "restaurant")
     private Set<Product> productsCatalog;
+
+    public Restaurant () {}
 
     public Restaurant(Long id, String name, Address address) {
         this.id = id;

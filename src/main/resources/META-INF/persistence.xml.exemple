@@ -1,0 +1,37 @@
+
+
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+    <persistence-unit name="ch.hearc.ig.orderresto">
+        <description>
+            Persistence unit for the Order Resto application
+        </description>
+
+        <class>ch.hearc.ig.orderresto.business.Restaurant</class>
+        <class>ch.hearc.ig.orderresto.business.Product</class>
+        <class>ch.hearc.ig.orderresto.business.Order</class>
+
+        <properties>
+            <!-- Database connection settings -->
+            <property name="jakarta.persistence.jdbc.driver" value="oracle.jdbc.driver.OracleDriver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:oracle:thin:@your.url:1521:sid" />
+            <property name="jakarta.persistence.jdbc.user" value="YOUR_USERNAME" />
+            <property name="jakarta.persistence.jdbc.password" value="YOUR_PASSWORD" />
+
+            <!-- Echo all executed SQL to console -->
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.highlight_sql" value="true" />
+
+            <!-- Automatically export the schema -->
+            <property name="jakarta.persistence.schema-generation.database.action" value="create" />
+
+        </properties>
+
+    </persistence-unit>
+
+</persistence>
+
