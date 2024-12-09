@@ -5,6 +5,12 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(
+        name = "TYPE",
+        discriminatorType = DiscriminatorType.CHAR
+)
+@DiscriminatorValue("C")
 @Entity
 @Table(
         name = "CLIENT"
@@ -13,6 +19,7 @@ public abstract class Customer {
 
     @Id
     @GeneratedValue
+    @Column(name = "NUMERO")
     private Long id;
 
     @Column(name = "TELEPHONE", nullable = false)
