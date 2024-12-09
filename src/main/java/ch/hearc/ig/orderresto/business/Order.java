@@ -16,6 +16,7 @@ public class Order {
 
     @Id
     @GeneratedValue
+    @Column(name = "NUMERO")
     private Long id;
 
     @ManyToOne
@@ -35,12 +36,14 @@ public class Order {
     private Set<Product> products;
 
     @Convert(converter = BooleanConverter.class)
+    @Column(name = "A_EMPORTER", nullable = false)
     private Boolean takeAway;
 
     // Since Java 8, the new Java Date and Time API is available for dealing with temporal values.
     @Column(name = "QUAND", nullable = false)
     private LocalDateTime when;
 
+    @Transient
     private BigDecimal totalAmount;
 
     public Order() {}

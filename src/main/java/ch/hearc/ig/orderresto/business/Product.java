@@ -14,6 +14,7 @@ public class Product {
 
     @Id
     @GeneratedValue
+    @Column(name = "NUMERO")
     private Long id;
 
     @Column(name = "NOM", nullable = false)

@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // WORK IN PROGRESS
+        // CREATE A RESTAURANT
         Address address = new Address.Builder().withLocality("Lausanne").withCountryCode("CH").withPostalCode("1000").withStreet("Rue de la Gare").withStreetNumber("1").build();
         Restaurant restaurant = new Restaurant.Builder().withAddress(address).withName("McDo").build();
 
