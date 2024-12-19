@@ -2,12 +2,11 @@ package ch.hearc.ig.orderresto.service;
 
 import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.business.Product;
-import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
-import ch.hearc.ig.orderresto.persistence.data.ProductDataMapper;
-import ch.hearc.ig.orderresto.persistence.data.ProductOrderMapper;
+import ch.hearc.ig.orderresto.utils.HibernateUtil;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
-import java.sql.SQLException;
 import java.util.Set;
 
 /**
@@ -28,10 +27,6 @@ public class ProductOrderService {
         return instance;
     }
 
-    private final OrderDataMapper orderDataMapper = OrderDataMapper.getInstance();
-    private final ProductDataMapper productDataMapper = ProductDataMapper.getInstance();
-    private final ProductOrderMapper productOrderMapper = ProductOrderMapper.getInstance();
-
     /**
      * Retrieves all products associated with a specific order.
      *
@@ -41,11 +36,15 @@ public class ProductOrderService {
     public Set<Product> getProductsFromOrder(Order order) {
         Set<Product> products = null;
 
-        try {
-            // Set products of the order
-            products = productOrderMapper.selectProductsWhereOrder(order);
+        EntityManager entityManager = HibernateUtil.getEntityManager();
 
-        } catch (SQLException e) {
+        try {
+            // Make sure the order is instanced, if not already
+            entityManager.refresh(order);
+
+            products = order.getProducts();
+
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get the products of an order: " + e.getMessage() );
         }
 
@@ -60,14 +59,21 @@ public class ProductOrderService {
      */
     public boolean addOrderToRestaurant(Order order) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            orderDataMapper.insert(order);
-            for (Product product : order.getProducts()) {
-                productOrderMapper.insertProductOrderRelation(product, order);
-            }
+            transaction.begin();
+
+            entityManager.persist(order);
+
+            transaction.commit();
+
             return true;
-        } catch (SQLException e) {
-            SimpleLogger.error("An error occured while trying to add an order to the restaurant: " + e.getMessage() );
+        } catch (Exception e) {
+            transaction.rollback();
+            SimpleLogger.error("An error occured while trying to add an order to the restaurant: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return false;
@@ -81,9 +87,19 @@ public class ProductOrderService {
      */
     public boolean addProductToRestaurant(Product product) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return productDataMapper.insert(product);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.persist(product);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to add a product to the restaurant: " + e.getMessage() );
         }
 
@@ -98,9 +114,19 @@ public class ProductOrderService {
      */
     public boolean modifyOrder(Order order) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return orderDataMapper.update(order);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.merge(order);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to modify an order: " + e.getMessage() );
         }
 
@@ -115,9 +141,19 @@ public class ProductOrderService {
      */
     public boolean modifyProduct(Product product) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return productDataMapper.update(product);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.merge(product);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to modify a product: " + e.getMessage() );
         }
 
@@ -132,10 +168,19 @@ public class ProductOrderService {
      */
     public boolean removeOrder(Order order) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            productOrderMapper.deleteProductOrderRelation(order.getId());
-            return orderDataMapper.delete(order);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.remove(order);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to remove an order: " + e.getMessage() );
         }
 
@@ -151,9 +196,19 @@ public class ProductOrderService {
      */
     public boolean removeProduct(Product product) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return productDataMapper.delete(product);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.remove(product);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to remove a product: " + e.getMessage() );
         }
 

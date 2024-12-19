@@ -3,12 +3,11 @@ package ch.hearc.ig.orderresto.service;
 import ch.hearc.ig.orderresto.business.Order;
 import ch.hearc.ig.orderresto.business.Product;
 import ch.hearc.ig.orderresto.business.Restaurant;
-import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
-import ch.hearc.ig.orderresto.persistence.data.ProductDataMapper;
-import ch.hearc.ig.orderresto.persistence.data.RestaurantDataMapper;
+import ch.hearc.ig.orderresto.utils.HibernateUtil;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,9 +29,6 @@ public class RestaurantService {
         return instance;
     }
 
-    private final RestaurantDataMapper restaurantDataMapper = RestaurantDataMapper.getInstance();
-    private final OrderDataMapper orderDataMapper = OrderDataMapper.getInstance();
-    private final ProductDataMapper productDataMapper = ProductDataMapper.getInstance();
 
     /**
      * Retrieves all orders associated with a specific restaurant.
@@ -41,16 +37,14 @@ public class RestaurantService {
      * @return a set of orders associated with the restaurant, or null if an error occurs.
      */
     public Set<Order> getOrdersFromRestaurant(Restaurant restaurant) {
-        Set<Order> orders = null;
 
         try {
-            orders = orderDataMapper.selectWhereRestaurantId(restaurant.getId());
-            restaurant.setOrders(orders);
-        } catch (SQLException e) {
+            return restaurant.getOrders();
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get the orders of a restaurant: " + e.getMessage() );
         }
 
-        return orders;
+        return null;
     }
 
     /**
@@ -60,16 +54,14 @@ public class RestaurantService {
      * @return a set of products associated with the restaurant, or null if an error occurs.
      */
     public Set<Product> getProductsFromRestaurant(Restaurant restaurant) {
-        Set<Product> products = null;
 
         try {
-            products = productDataMapper.selectWhereRestaurantId(restaurant.getId());
-            restaurant.setProductsCatalog(products);
-        } catch (SQLException e) {
+            return restaurant.getProductsCatalog();
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get the products of a restaurant: " + e.getMessage() );
         }
 
-        return products;
+        return null;
     }
 
     /**
@@ -80,9 +72,11 @@ public class RestaurantService {
      */
     public Optional<Restaurant> getRestaurantById(Long id) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+
         try {
-            return restaurantDataMapper.selectById(id);
-        } catch (SQLException e) {
+            return Optional.ofNullable(entityManager.find(Restaurant.class, id));
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get a restaurant by id: " + e.getMessage() );
         }
 
@@ -96,9 +90,11 @@ public class RestaurantService {
      */
     public List<Restaurant> getAllRestaurants() {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+
         try {
-            return restaurantDataMapper.selectAll();
-        } catch (SQLException e) {
+            return entityManager.createQuery("SELECT r FROM Restaurant r", Restaurant.class).getResultList();
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get all restaurants: " + e.getMessage() );
         }
 
@@ -113,9 +109,19 @@ public class RestaurantService {
      */
     public boolean addRestaurant(Restaurant restaurant) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return restaurantDataMapper.insert(restaurant);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.persist(restaurant);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to add a restaurant: " + e.getMessage() );
         }
 
@@ -130,9 +136,19 @@ public class RestaurantService {
      */
     public boolean modifyRestaurant(Restaurant restaurant) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return restaurantDataMapper.update(restaurant);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.merge(restaurant);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to modify a restaurant: " + e.getMessage() );
         }
 
@@ -147,9 +163,19 @@ public class RestaurantService {
      */
     public boolean removeRestaurant(Restaurant restaurant) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return restaurantDataMapper.delete(restaurant);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.remove(restaurant);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to remove a restaurant: " + e.getMessage() );
         }
 

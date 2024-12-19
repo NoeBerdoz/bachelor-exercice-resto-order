@@ -2,14 +2,12 @@ package ch.hearc.ig.orderresto.service;
 
 import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.Order;
-import ch.hearc.ig.orderresto.business.PrivateCustomer;
-import ch.hearc.ig.orderresto.persistence.data.CustomerDataMapper;
-import ch.hearc.ig.orderresto.persistence.data.OrderDataMapper;
+import ch.hearc.ig.orderresto.utils.HibernateUtil;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,9 +28,6 @@ public class CustomerService {
         return instance;
     }
 
-    private final CustomerDataMapper customerDataMapper = CustomerDataMapper.getInstance();
-    private final OrderDataMapper orderDataMapper = OrderDataMapper.getInstance();
-
     /**
      * Retrieves all orders for a given customer, including product details for each order.
      *
@@ -43,15 +38,10 @@ public class CustomerService {
         Set<Order> orders = null;
 
         try {
-            orders = orderDataMapper.selectWhereCustomerId(customer.getId());
 
-            // set the products of the order, and therefore the total amount of the order
-            for (Order order : orders) {
-                ProductOrderService.getInstance().getProductsFromOrder(order);
-            }
+            orders = customer.getOrders();
 
-            customer.setOrders(orders);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get the orders of a customer: " + e.getMessage() );
         }
 
@@ -66,19 +56,23 @@ public class CustomerService {
      * @return true if the customer was successfully added, false otherwise.
      */
     public boolean addCustomer(Customer customer) {
+
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            // Manage the already present technical debt given with the exercise
-            // Gender in database is a char "O" or "N" and in the application it's "F" or "M"
-            if (customer instanceof PrivateCustomer) {
-                if (Objects.equals(((PrivateCustomer) customer).getGender(), "F")) {
-                    ((PrivateCustomer) customer).setGender("O");
-                } else {
-                    ((PrivateCustomer) customer).setGender("N");
-                }
-            }
-            return customerDataMapper.insert(customer);
-        } catch (SQLException e) {
+
+            transaction.begin();
+
+            entityManager.persist(customer);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to add a customer: " + e.getMessage());
+            e.printStackTrace();  // Log the full stack trace to diagnose the issue
         }
 
         return false;
@@ -92,9 +86,19 @@ public class CustomerService {
      */
     public boolean modifyCustomer(Customer customer) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return customerDataMapper.update(customer);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.merge(customer);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to modify a customer: " + e.getMessage());
         }
 
@@ -109,9 +113,19 @@ public class CustomerService {
      */
     public boolean removeCustomer(Customer customer) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
         try {
-            return customerDataMapper.delete(customer);
-        } catch (SQLException e) {
+            transaction.begin();
+
+            entityManager.remove(customer);
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            transaction.rollback();
             SimpleLogger.error("An error occured while trying to remove a customer: " + e.getMessage());
         }
 
@@ -126,9 +140,11 @@ public class CustomerService {
      */
     public Optional<Customer> getCustomerById(Long id) {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+
         try {
-            return customerDataMapper.selectById(id);
-        } catch (SQLException e) {
+            return Optional.ofNullable(entityManager.find(Customer.class, id));
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get a customer by id: " + e.getMessage());
         }
 
@@ -143,9 +159,11 @@ public class CustomerService {
      */
     public List<Customer> getAllCustomers() {
 
+        EntityManager entityManager = HibernateUtil.getEntityManager();
+
         try {
-            return customerDataMapper.selectAll();
-        } catch (SQLException e) {
+            return entityManager.createQuery("SELECT c FROM Customer c", Customer.class).getResultList();
+        } catch (Exception e) {
             SimpleLogger.error("An error occured while trying to get all customers: " + e.getMessage());
         }
 
