@@ -18,7 +18,7 @@ public class Address {
     @Column(name="RUE", nullable = false)
     private String street;
 
-    @Column(name="NUM_RUE", nullable = false)
+    @Column(name="NUM_RUE")
     private String streetNumber;
 
     public Address() {}
