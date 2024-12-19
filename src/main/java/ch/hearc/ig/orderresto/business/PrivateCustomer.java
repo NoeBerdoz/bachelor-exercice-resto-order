@@ -1,6 +1,6 @@
 package ch.hearc.ig.orderresto.business;
 
-import ch.hearc.ig.orderresto.persistence.helper.BooleanConverter;
+import ch.hearc.ig.orderresto.persistence.helper.GenderConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
@@ -10,7 +10,7 @@ import jakarta.persistence.Entity;
 @Entity
 public class PrivateCustomer extends Customer {
 
-    @Convert(converter = BooleanConverter.class)
+    @Convert(converter = GenderConverter.class)
     @Column(name = "EST_UNE_FEMME")
     private String gender;
 
