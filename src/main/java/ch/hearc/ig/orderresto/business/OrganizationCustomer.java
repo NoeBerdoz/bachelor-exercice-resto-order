@@ -11,7 +11,7 @@ public class OrganizationCustomer extends Customer {
     @Column(name = "NOM", nullable = false)
     private String name;
 
-    @Column(name = "FORME_SOCIAL", nullable = false)
+    @Column(name = "FORME_SOCIAL")
     private String legalForm;
 
     public OrganizationCustomer() {}
