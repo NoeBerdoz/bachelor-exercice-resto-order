@@ -1,4 +1,4 @@
-package ch.hearc.ig.orderresto.persistence.converter;
+package ch.hearc.ig.orderresto.persistence.converters;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
