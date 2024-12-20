@@ -1,6 +1,6 @@
 package ch.hearc.ig.orderresto.business;
 
-import ch.hearc.ig.orderresto.persistence.helper.BooleanConverter;
+import ch.hearc.ig.orderresto.persistence.converter.BooleanConverter;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

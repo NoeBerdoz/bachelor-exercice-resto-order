@@ -1,8 +1,8 @@
 package ch.hearc.ig.orderresto.presentation;
 
 import ch.hearc.ig.orderresto.business.Order;
-import ch.hearc.ig.orderresto.persistence.connection.DatabaseConnection;
 import ch.hearc.ig.orderresto.service.ProductOrderService;
+import ch.hearc.ig.orderresto.persistence.utils.HibernateUtil;
 
 public class MainCLI extends AbstractCLI {
     public void run() {
@@ -20,7 +20,7 @@ public class MainCLI extends AbstractCLI {
 
             // Close the database connection as the user leaves the application
             try {
-                DatabaseConnection.closeConnection();
+                HibernateUtil.shutdown();
             } catch (Exception e) {
                 this.ln("Failed to close database connection");
             }

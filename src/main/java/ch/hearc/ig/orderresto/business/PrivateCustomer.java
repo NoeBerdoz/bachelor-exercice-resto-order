@@ -1,6 +1,6 @@
 package ch.hearc.ig.orderresto.business;
 
-import ch.hearc.ig.orderresto.persistence.helper.GenderConverter;
+import ch.hearc.ig.orderresto.persistence.converter.GenderConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;

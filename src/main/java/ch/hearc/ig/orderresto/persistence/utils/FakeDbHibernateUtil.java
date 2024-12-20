@@ -1,21 +1,31 @@
-package ch.hearc.ig.orderresto.persistence;
+package ch.hearc.ig.orderresto.persistence.utils;
 
 import ch.hearc.ig.orderresto.business.*;
 import ch.hearc.ig.orderresto.service.CustomerService;
 import ch.hearc.ig.orderresto.service.ProductOrderService;
 import ch.hearc.ig.orderresto.service.RestaurantService;
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.math.BigDecimal;
 
-public class FakeDbHibernate {
+public class FakeDbHibernateUtil {
 
     RestaurantService restaurantService = RestaurantService.getInstance();
     CustomerService customerService = CustomerService.getInstance();
     ProductOrderService productOrderService = ProductOrderService.getInstance();
 
     public void initFakePopulation() {
-        populateCustomer();
-        populateRestaurant();
+        if (isDatabaseEmpty()) {
+            populateCustomer();
+            populateRestaurant();
+            SimpleLogger.info("Populated database with fake data");
+        } else {
+            SimpleLogger.warning("Skipped fake data population, database is not empty");
+        }
+    }
+
+    private boolean isDatabaseEmpty() {
+        return restaurantService.getAllRestaurants().isEmpty() && customerService.getAllCustomers().isEmpty();
     }
 
     private void populateCustomer() {

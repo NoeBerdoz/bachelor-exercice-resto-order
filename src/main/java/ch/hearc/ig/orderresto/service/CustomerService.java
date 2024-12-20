@@ -2,7 +2,7 @@ package ch.hearc.ig.orderresto.service;
 
 import ch.hearc.ig.orderresto.business.Customer;
 import ch.hearc.ig.orderresto.business.Order;
-import ch.hearc.ig.orderresto.utils.HibernateUtil;
+import ch.hearc.ig.orderresto.persistence.utils.HibernateUtil;
 import ch.hearc.ig.orderresto.utils.SimpleLogger;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;

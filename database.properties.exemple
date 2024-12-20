@@ -1,3 +1,0 @@
-db.url=jdbc:oracle:thin:@your_host:your_port:your_service_name
-db.user=your_username
-db.password=your_password

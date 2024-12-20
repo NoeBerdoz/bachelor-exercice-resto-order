@@ -1,5 +1,6 @@
-package ch.hearc.ig.orderresto.utils;
+package ch.hearc.ig.orderresto.persistence.utils;
 
+import ch.hearc.ig.orderresto.utils.SimpleLogger;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -17,6 +18,7 @@ public class HibernateUtil {
 
     public static void shutdown() {
         if (entityManagerFactory != null) {
+            SimpleLogger.info("Closing EntityManagerFactory");
             entityManagerFactory.close();
         }
     }
