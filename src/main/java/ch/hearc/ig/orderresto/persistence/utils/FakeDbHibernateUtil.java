@@ -8,6 +8,10 @@ import ch.hearc.ig.orderresto.utils.SimpleLogger;
 
 import java.math.BigDecimal;
 
+/**
+ * Utility class to populate the database with fake data concerning customers, restaurants, and products.
+ * The data is added only if the database is empty to prevent duplicate entries.
+ */
 public class FakeDbHibernateUtil {
 
     RestaurantService restaurantService = RestaurantService.getInstance();
@@ -68,7 +72,6 @@ public class FakeDbHibernateUtil {
         productOrderService.addProductToRestaurant(product4);
         productOrderService.addProductToRestaurant(product5);
         productOrderService.addProductToRestaurant(product6);
-
 
     }
 }

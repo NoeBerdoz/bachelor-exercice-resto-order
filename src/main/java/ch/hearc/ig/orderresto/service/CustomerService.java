@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Service class that provides methods for managing customers, including retrieving, adding, modifying,
- * and deleting customer records. It interacts with the data access layer (mappers) to perform operations
+ * and deleting customer records. It interacts with Hibernate to perform operations
  * related to customers and their associated orders.
  */
 public class CustomerService {

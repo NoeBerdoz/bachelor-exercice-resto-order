@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * Service class that handles operations related to restaurants, including retrieving, adding, modifying,
  * and removing restaurants. It also manages retrieving related orders and products for each restaurant.
- * This service interacts with the data access layer to perform these operations.
+ * This service interacts with Hibernate to perform these operations.
  */
 public class RestaurantService {
 

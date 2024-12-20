@@ -11,8 +11,8 @@ import java.util.Set;
 
 /**
  * Service class that handles operations related to orders and products, including adding, modifying,
- * removing, and retrieving orders and products in the context of a restaurant. It interacts with the
- * data access layer to manage the relationships between orders and products.
+ * removing, and retrieving orders and products in the context of a restaurant. It interacts with Hibernate
+ * to manage the relationships between orders and products.
  */
 public class ProductOrderService {
 
