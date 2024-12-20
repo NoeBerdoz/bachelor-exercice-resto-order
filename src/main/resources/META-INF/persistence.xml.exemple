@@ -21,8 +21,8 @@
             <property name="jakarta.persistence.jdbc.user" value="YOUR_USERNAME" />
             <property name="jakarta.persistence.jdbc.password" value="YOUR_PASSWORD" />
 
-            <!-- Echo all executed SQL to console -->
-            <property name="hibernate.show_sql" value="true" />
+            <!-- Logs all executed SQL to console -->
+            <property name="hibernate.show_sql" value="false" />
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.highlight_sql" value="true" />
 
